@@ -1,0 +1,6 @@
+node_modules/
+train-my-brain.zip
+site/public/
+site/resources/_gen/
+site/.hugo_build.lock
+.DS_Store

@@ -1,0 +1,20 @@
+{
+  "name": "tmb",
+  "displayName": "Train My Brain",
+  "version": "0.1.0",
+  "description": "A learning curriculum builder that interviews you about your goal, designs a structured hands-on curriculum, and builds a GitHub repo with exercises, validation, and an optional Hugo site.",
+  "author": {
+    "name": "Dylan Thomas",
+    "email": "dylan@alwaysmap.com"
+  },
+  "repository": "https://github.com/alwaysmap/train-my-brain",
+  "homepage": "https://trainmybrain.dev",
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "learning",
+    "curriculum",
+    "study-plan",
+    "education",
+    "career"
+  ]
+}
