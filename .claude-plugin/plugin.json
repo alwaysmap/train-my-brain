@@ -1,7 +1,7 @@
 {
   "name": "tmb",
   "displayName": "Train My Brain",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A learning curriculum builder that interviews you about your goal, designs a structured hands-on curriculum, and builds a GitHub repo with exercises, validation, and an optional Hugo site.",
   "author": {
     "name": "Dylan Thomas",

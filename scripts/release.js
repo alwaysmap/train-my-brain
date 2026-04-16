@@ -5,13 +5,16 @@
  * Usage: npm run release -- 0.2.0
  *
  * This will:
- * 1. Update version in plugin.json, marketplace.json, and package.json
- * 2. Commit the version bump on the current branch
+ * 1. Update version in plugin.json and package.json
+ * 2. Commit the version bump
  * 3. Create git tag v0.2.0
- * 4. Push HEAD to origin/main and push the tag
- * 5. GitHub Actions builds the zip and creates the release
+ * 4. Push HEAD to origin/main and the tag
  *
- * Worktree-safe: the push uses HEAD:main rather than the local main ref.
+ * GitHub Actions then:
+ * 5. Builds train-my-brain.zip
+ * 6. Creates a GitHub Release
+ * 7. Dispatches a plugin-released event to alwaysmap/marketplace
+ * 8. The marketplace workflow updates marketplace.json automatically
  */
 
 import fs from 'node:fs';
@@ -36,7 +39,6 @@ if (!/^\d+\.\d+\.\d+$/.test(version)) {
 
 const tag = `v${version}`;
 
-// Check for uncommitted changes
 const status = execSync('git status --porcelain', { cwd: root }).toString().trim();
 if (status) {
   console.error('Working tree is dirty. Commit or stash changes first.\n');
@@ -44,7 +46,6 @@ if (status) {
   process.exit(1);
 }
 
-// Check tag doesn't already exist
 try {
   execSync(`git rev-parse ${tag} 2>/dev/null`, { cwd: root });
   console.error(`Tag ${tag} already exists.`);
@@ -53,31 +54,21 @@ try {
   // good — tag doesn't exist
 }
 
-// Update version in files
 function updateVersion(filePath) {
   const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
   json.version = version;
   fs.writeFileSync(filePath, JSON.stringify(json, null, 2) + '\n', 'utf8');
+  console.log(`Updated ${path.relative(root, filePath)}: ${version}`);
 }
 
 updateVersion(path.join(root, '.claude-plugin', 'plugin.json'));
 updateVersion(path.join(root, 'package.json'));
 
-const marketplacePath = path.join(root, '.claude-plugin', 'marketplace.json');
-const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
-if (marketplace.plugins?.[0]) {
-  marketplace.plugins[0].version = version;
-  fs.writeFileSync(marketplacePath, JSON.stringify(marketplace, null, 2) + '\n', 'utf8');
-}
-
-console.log(`Updated version to ${version}`);
-
-// Commit, tag, push
 const run = (cmd) => execSync(cmd, { cwd: root, stdio: 'inherit' });
 
-run('git add .claude-plugin/plugin.json .claude-plugin/marketplace.json package.json');
+run('git add .claude-plugin/plugin.json package.json');
 run(`git commit -m "Release ${tag}"`);
 run(`git tag ${tag}`);
 run(`git push origin HEAD:main ${tag}`);
 
-console.log(`\nReleased ${tag} — GitHub Actions will build and publish the zip.`);
+console.log(`\nReleased ${tag} — GitHub Actions will build, publish, and update the marketplace.`);

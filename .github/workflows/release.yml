@@ -8,24 +8,40 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
+  # ── 1. Build zip and publish release ────────────────────────────────────
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-
-      - name: Build plugin zip
-        run: npm run build
+      - name: Build zip
+        run: |
+          zip -r train-my-brain.zip \
+            .claude-plugin/plugin.json \
+            skills/ \
+            README.md \
+            LICENSE \
+            -x "*/.DS_Store"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: train-my-brain.zip
           generate_release_notes: true
+
+  # ── 2. Notify marketplace ────────────────────────────────────────────────
+  marketplace:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.MARKETPLACE_DISPATCH_TOKEN }}
+          repository: alwaysmap/marketplace
+          event-type: plugin-released
+          client-payload: |
+            {
+              "plugin": "tmb",
+              "version": "${{ github.ref_name }}"
+            }

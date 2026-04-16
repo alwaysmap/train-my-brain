@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * build.js — Package the plugin into train-my-brain.zip for Claude Work.
+ * build.js — Package the plugin into train-my-brain.zip.
  *
  * If a git tag (v*) is checked out, syncs the version into plugin.json
  * and package.json before building. Otherwise uses whatever version is
  * already in the files.
  *
- * Usage: npm run build (from project root)
+ * Usage: npm run build
  */
 
 import fs from 'node:fs';
@@ -41,20 +41,11 @@ function updateJsonVersion(filePath, version) {
   return true;
 }
 
-function updateMarketplaceVersion(filePath, version) {
-  const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  if (json.plugins?.[0]) {
-    json.plugins[0].version = version;
-    fs.writeFileSync(filePath, JSON.stringify(json, null, 2) + '\n', 'utf8');
-  }
-}
-
 const tagVersion = getGitTagVersion();
 
 if (tagVersion) {
   updateJsonVersion(path.join(root, '.claude-plugin', 'plugin.json'), tagVersion);
   updateJsonVersion(path.join(root, 'package.json'), tagVersion);
-  updateMarketplaceVersion(path.join(root, '.claude-plugin', 'marketplace.json'), tagVersion);
 } else {
   const plugin = JSON.parse(fs.readFileSync(path.join(root, '.claude-plugin', 'plugin.json'), 'utf8'));
   console.log(`No git tag on HEAD — using version ${plugin.version} from plugin.json`);
@@ -67,10 +58,8 @@ if (fs.existsSync(outFile)) {
   console.log('Removed existing train-my-brain.zip');
 }
 
-// TMB has no runtime scripts — just the plugin metadata and skills
 const includes = [
   '.claude-plugin/plugin.json',
-  '.claude-plugin/marketplace.json',
   'skills/',
   'README.md',
   'LICENSE',
