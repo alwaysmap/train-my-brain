@@ -20,8 +20,16 @@ jobs:
           zip -r train-my-brain.zip \
             .claude-plugin/plugin.json \
             skills/ \
+            agents/ \
+            commands/ \
+            references/ \
+            scripts/check-hugo.sh \
+            scripts/check-hugo.ps1 \
+            scripts/scaffold-site.sh \
+            curriculum-templates/ \
             README.md \
             LICENSE \
+            CHANGELOG.md \
             -x "*/.DS_Store"
 
       - name: Create GitHub Release

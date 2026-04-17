@@ -61,8 +61,16 @@ if (fs.existsSync(outFile)) {
 const includes = [
   '.claude-plugin/plugin.json',
   'skills/',
+  'agents/',
+  'commands/',
+  'references/',
+  'scripts/check-hugo.sh',
+  'scripts/check-hugo.ps1',
+  'scripts/scaffold-site.sh',
+  'curriculum-templates/',
   'README.md',
   'LICENSE',
+  'CHANGELOG.md',
 ];
 
 const args = includes.map(f => JSON.stringify(f)).join(' ');
