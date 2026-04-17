@@ -13,7 +13,7 @@
  * GitHub Actions then:
  * 5. Builds train-my-brain.zip
  * 6. Creates a GitHub Release
- * 7. Dispatches a plugin-released event to alwaysmap/marketplace
+ * 7. Dispatches a plugin-released event to alwaysmap/alwaysmap-marketplace
  * 8. The marketplace workflow updates marketplace.json automatically
  */
 
