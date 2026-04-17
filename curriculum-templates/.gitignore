@@ -1,0 +1,6 @@
+# TMB curriculum gitignore
+site/public/
+site/resources/
+site/.hugo_build.lock
+.hugo.pid
+.DS_Store
