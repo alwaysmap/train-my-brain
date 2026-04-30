@@ -195,6 +195,14 @@ draft: false
 EOF
 
 # ── Layouts ───────────────────────────────────────────────────
+# Clean up any stale layouts from older plugin versions before writing the
+# current set. v0.4.0–0.4.2 used _default/page.html + _default/section.html
+# (no module/ dir, no shortcodes); v0.4.3+ uses _default/list.html +
+# _default/single.html + module/section.html + shortcodes/gloss.html. Stale
+# files would win Hugo's lookup over the new ones, so they have to go.
+rm -f "$TARGET/site/layouts/_default/page.html"
+rm -f "$TARGET/site/layouts/_default/section.html"
+
 mkdir -p "$TARGET/site/layouts/_default" \
          "$TARGET/site/layouts/partials" \
          "$TARGET/site/layouts/module" \

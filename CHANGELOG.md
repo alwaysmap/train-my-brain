@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.7 — 2026-04-30
+
+### Fixed
+
+- **`scaffold-site.sh --layouts-only` now cleans up stale layouts.** v0.4.0–0.4.2 used `layouts/_default/page.html` and `layouts/_default/section.html`; v0.4.3+ replaced them with `layouts/_default/list.html` + `layouts/_default/single.html` + `layouts/module/section.html`. Refreshing layouts wrote the new files but left the old ones behind, and Hugo's lookup picked the older `section.html` for any generic section page (e.g., `/modules/<slug>/exercises/`), causing the `<span class="status">planned</span>` pill to keep rendering. Now `--layouts-only` deletes those two stale files before writing the current set.
+
+  Existing curricula migrated from v0.4.2 should re-run `/tmb:rebuild-site` (or, equivalently, `bash scripts/scaffold-site.sh --target . --layouts-only && ./build.sh`) to pick up the cleanup. v0.4.4-onwards-fresh curricula are unaffected.
+
 ## 0.4.6 — 2026-04-30
 
 ### Changed
