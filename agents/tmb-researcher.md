@@ -33,30 +33,33 @@ Exactly one file: `<curriculum_root>/research.yaml`.
 
 You may create no other files. You do not modify spine, briefs, or any module page (none exist yet).
 
+## Time budget
+
+Target **3-5 minutes**, total. The whole point of the research phase is "do this once, fast, so the parallel module-builders can ground themselves." If you find yourself iterating past 8-10 web requests for a single concept, you're over-researching — write what you have, surface the gap as an `open_question`, and move on.
+
+Hard caps: ~12 `WebSearch` calls and ~15 `WebFetch` calls for the whole pass. Hit the cap → write what you have and exit.
+
 ## Research flow
 
 1. **Read the interview.** Extract the topic, the goal (Step 1), how the learner will be tested (Step 2), starting point (Step 3), depth/breadth choice (Step 4). These shape *which* topics inside the broader domain are in scope.
 
-2. **Search broadly first.** Run web searches for the topic and skim authoritative sources. Look for:
+2. **Search broadly first.** Run 3-6 web searches covering the topic. Look for:
    - Official documentation (language docs, project docs, RFCs, standards bodies).
-   - One or two well-regarded plain-language explainers (e.g., "Use The Index, Luke" for SQL planning).
+   - One or two well-regarded plain-language explainers.
    - Current canonical books / talks / long-running blog series.
-   - Any community-recognized authority list ("the people you'd cite when arguing this").
+   - Community-recognized authorities.
 
-3. **Triangulate definitions.** For each candidate glossary term, find at least two sources that define it consistently. The definition you write should be:
-   - One sentence, plain language, no jargon-defining-jargon.
-   - Specific enough that two module-builders writing about it independently would not introduce contradictions.
-   - Faithful to how the field actually uses the word — not a textbook strawman.
+3. **Write definitions from one good source.** For each glossary term, pick the most authoritative source you found and write a one-sentence plain-language definition from it. **Do NOT triangulate against a second source** — the reviewer's `merge-glossary.sh` catches inter-module conflicts later if a builder genuinely diverges.
 
-4. **Capture section anchors.** When you record a source URL, also record the specific section IDs and anchors the designer should point modules at. `https://example.com/docs#using-explain-basics` is what the designer needs, not just `https://example.com/docs`. Test the anchor — fetch the page and confirm the anchor exists.
+4. **Capture section anchors when you naturally see them.** When skimming a source page you've already fetched, note any section IDs that are obvious anchors (`#using-explain-basics`, `#tuning`, etc.). **Do NOT separately fetch every page just to verify anchors** — `check-urls.sh` runs in the reviewer phase and catches dead URLs, and the cost of a bad anchor is a click, not a curriculum failure.
 
-5. **Build the concept map.** For each concept in scope, list its prerequisites *within this domain*. Concepts that depend on nothing are foundation modules; concepts deep in the dependency graph are later modules. This is the input the designer uses to sequence the curriculum.
+5. **Build the concept map.** For each concept in scope, list its prerequisites *within this domain*. Concepts that depend on nothing are foundation modules; concepts deep in the dependency graph are later modules.
 
-6. **Identify real contrasts.** Every concept that has a "the practitioner could have used X instead" alternative gets a contrast entry. The contrast must be honest: name a real situation where the alternative wins. If you cannot name one, the contrast is fake — drop it or research more deeply.
+6. **Identify real contrasts.** Every concept with a "practitioner could have used X instead" alternative gets a contrast entry, with a real situation where the alternative wins. If you can't name one honestly, drop the contrast.
 
-7. **List authorities.** 2-5 names/sources the field treats as credible. The reviewer uses this list to flag low-credibility URLs that slip into briefs.
+7. **List authorities.** 2-5 names/sources the field treats as credible.
 
-8. **Note open questions.** Anything you couldn't resolve: an ambiguous version, an out-of-scope sub-area, a question only the user can answer. The orchestrator will surface these to the user before dispatching the designer.
+8. **Note open questions.** Anything you couldn't resolve: ambiguous versions, out-of-scope areas, questions only the user can answer. The orchestrator surfaces these to the user before the designer runs.
 
 ## Validation
 

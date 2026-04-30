@@ -12,9 +12,13 @@
 #     unhealthy: [ { brief, field, url, status } ... ] }
 #
 # Exit:
-#   0 if every URL returned 2xx
-#   1 if any URL was unhealthy
-#   2 on usage/setup error
+#   0 always when the script ran successfully — regardless of how many URLs
+#     were unhealthy. The `ok` JSON field tells the calling agent whether
+#     everything was healthy; the `unhealthy[]` list is what review.md flags.
+#   2 on usage/setup error (missing yq, jq, curl, or briefs dir).
+#
+# Rationale: this script is a *report*, not a gate. URL decay is normal and
+# must not abort the reviewer.
 
 set -euo pipefail
 
@@ -59,8 +63,8 @@ done
 
 if [ "$(jq 'length' <<< "$unhealthy")" -eq 0 ]; then
   jq -nc --argjson r "$results" '{ok: true, results: $r, unhealthy: []}'
-  exit 0
+else
+  jq -nc --argjson r "$results" --argjson u "$unhealthy" \
+    '{ok: false, results: $r, unhealthy: $u}'
 fi
-jq -nc --argjson r "$results" --argjson u "$unhealthy" \
-  '{ok: false, results: $r, unhealthy: $u}'
-exit 1
+exit 0

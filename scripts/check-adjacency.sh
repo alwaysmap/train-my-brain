@@ -68,7 +68,9 @@ done
 
 if [ "$(jq 'length' <<< "$mismatches")" -eq 0 ]; then
   jq -nc '{ok: true, mismatches: []}'
-  exit 0
+else
+  jq -nc --argjson m "$mismatches" '{ok: false, mismatches: $m}'
 fi
-jq -nc --argjson m "$mismatches" '{ok: false, mismatches: $m}'
-exit 1
+# Always exit 0 when the script ran successfully — mismatches are review.md
+# flags, not pipeline-aborting errors. Use the JSON `ok` field to branch.
+exit 0

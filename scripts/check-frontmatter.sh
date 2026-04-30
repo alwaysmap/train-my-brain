@@ -55,8 +55,10 @@ done
 
 if [ "$(jq 'length' <<< "$missing")" -eq 0 ] && [ "$(jq 'length' <<< "$mismatches")" -eq 0 ]; then
   jq -nc '{ok: true, missing_pages: [], mismatches: []}'
-  exit 0
+else
+  jq -nc --argjson mp "$missing" --argjson mm "$mismatches" \
+    '{ok: false, missing_pages: $mp, mismatches: $mm}'
 fi
-jq -nc --argjson mp "$missing" --argjson mm "$mismatches" \
-  '{ok: false, missing_pages: $mp, mismatches: $mm}'
-exit 1
+# Always exit 0 when the script ran — drift is a review.md flag, not a fatal
+# pipeline error. Use the JSON `ok` field to branch.
+exit 0

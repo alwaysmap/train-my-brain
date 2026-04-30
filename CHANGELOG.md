@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.2 — 2026-04-30
+
+### Fixed
+
+- **Researcher agent was over-budget** — taking ~1 hour on real topics instead of the 3-5 minute budget. Three trims:
+  - Dropped the per-anchor verification step (`Test the anchor — fetch the page and confirm the anchor exists`). For 4-10 sources × 1-3 sections each, that was 10-30 redundant `WebFetch` calls. The reviewer's `check-urls.sh` already catches dead URLs.
+  - Dropped the two-source triangulation requirement on every glossary term. One authoritative source is enough; if a builder later defines a term differently, `merge-glossary.sh` flags the divergence.
+  - Lowered glossary minimum from 8 to 5 entries (`validate-research.sh` and the schema doc both updated). Narrow topics were forcing extra search rounds to clear the gate.
+  - Added an explicit time budget (3-5 min target) and hard-cap hints (~12 `WebSearch`, ~15 `WebFetch`).
+- **Report scripts no longer exit non-zero on findings.** `check-urls.sh`, `check-adjacency.sh`, `check-frontmatter.sh`, and `check-ai-prose.sh` now always exit 0 when they ran successfully (regardless of how many issues they found). Their findings are `review.md` flags, not pipeline-aborting errors. Exit 2 still signals real setup errors (missing yq/jq/curl/dirs). Gates (`validate-briefs.sh`, `validate-research.sh`) keep their exit-1-on-gap behavior. This eliminates the alarming `Error: Exit code 1` surface in Claude Code when the reviewer is just reporting a 404 in a brief.
+
 ## 0.4.1 — 2026-04-30
 
 ### Fixed

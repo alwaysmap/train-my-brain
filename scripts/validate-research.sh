@@ -28,9 +28,9 @@ for f in topic goal created researcher_version; do
   case "$v" in ""|null) add "${f} is empty" ;; esac
 done
 
-# Glossary >= 8.
+# Glossary >= 5.
 gc=$(yq '.glossary | length' "$R")
-[ "$gc" -lt 8 ] && add "glossary has $gc entries (need >= 8)"
+[ "$gc" -lt 5 ] && add "glossary has $gc entries (need >= 5)"
 # Each entry has term + definition.
 bad=$(yq '[.glossary[] | select((.term // "") == "" or (.definition // "") == "")] | length' "$R")
 [ "$bad" -gt 0 ] && add "$bad glossary entries missing term or definition"

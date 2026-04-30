@@ -107,7 +107,7 @@ open_questions:
 The reviewer's preflight (`scripts/validate-research.sh`, called from `tmb-researcher` itself before exit) requires:
 
 - `topic`, `goal`, `created`, `researcher_version` — all non-empty strings.
-- `glossary` — at least 8 entries; every entry has `term` and `definition`.
+- `glossary` — at least 5 entries; every entry has `term` and `definition`.
 - `sources` — at least 3 entries; every entry has `title`, `url` (http(s)://), and at least one `sections[]` item.
 - `concept_map` — at least 5 entries; every entry has `concept` and `depends_on` (may be empty list).
 - `contrasts` — at least 2 entries; every entry has all four fields.

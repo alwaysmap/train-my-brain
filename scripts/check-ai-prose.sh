@@ -51,7 +51,9 @@ done
 
 if [ "$(jq 'length' <<< "$hits")" -eq 0 ]; then
   jq -nc '{ok: true, hits: []}'
-  exit 0
+else
+  jq -nc --argjson h "$hits" '{ok: false, hits: $h}'
 fi
-jq -nc --argjson h "$hits" '{ok: false, hits: $h}'
-exit 1
+# Always exit 0 — AI-prose hits are review.md flags for human triage, never
+# pipeline failures. Use the JSON `ok` field to branch.
+exit 0
