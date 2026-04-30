@@ -2,7 +2,7 @@
 name: tmb-create
 description: >
   Use this skill when the user wants to build a learning curriculum, study plan,
-  or "train their brain" on a topic. Triggers on "/tmb:create", "create a
+  or "train their brain" on a topic. Triggers on "/tmb:tmb-create", "create a
   curriculum", "build a learning plan for X", "help me learn X for a job",
   "I want to get credible in Y", "I need to learn X". Runs the 7-step interview,
   dispatches a one-shot topic researcher, designs modules, scaffolds a Hugo site,
@@ -18,7 +18,7 @@ argument-hint: "[optional topic hint — the interview will clarify]"
 allowed-tools: [Read, Write, Bash, Agent, Glob, Grep]
 ---
 
-# /tmb:create
+# /tmb:tmb-create
 
 Orchestrate a TMB v0.4 curriculum build. You do not write module content yourself — the agents and scripts do. Your job is to run phases in order, wire agents together, surface failures honestly, and deliver the result.
 

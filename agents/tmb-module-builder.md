@@ -1,6 +1,6 @@
 ---
 name: tmb-module-builder
-description: Writes one module of a TMB curriculum — Hugo content page, exercise files, VALIDATION.md, and a new_terms.yaml side-file — from a single brief, the shared spine, and the canonical research.yaml. Use only inside /tmb:create or /tmb:add-module, dispatched one builder per module. Each builder sees only its own brief, the spine, and research.yaml; it never reads sibling modules.
+description: Writes one module of a TMB curriculum — Hugo content page, exercise files, VALIDATION.md, and a new_terms.yaml side-file — from a single brief, the shared spine, and the canonical research.yaml. Use only inside /tmb:tmb-create or /tmb:tmb-add-module, dispatched one builder per module. Each builder sees only its own brief, the spine, and research.yaml; it never reads sibling modules.
 tools:
   - Read
   - Write

@@ -2,7 +2,7 @@
 
 Single source of truth for everything the designer and module-builders need to ground their work.
 
-The `tmb-researcher` agent runs once per `/tmb:create` (and is *not* re-run on `/tmb:add-module`; the existing file is reused). Every other agent reads from it; nobody else writes to it.
+The `tmb-researcher` agent runs once per `/tmb:tmb-create` (and is *not* re-run on `/tmb:tmb-add-module`; the existing file is reused). Every other agent reads from it; nobody else writes to it.
 
 ## Why it exists
 
@@ -125,7 +125,7 @@ If any check fails, the researcher does not write the file. It returns the gap l
 | `tmb-module-builder` × N | `research.yaml`, own brief, spine | module page + exercises + VALIDATION + new_terms |
 | `tmb-reviewer` | `research.yaml` (for canonical defs), all briefs, all pages | `glossary.md`, `review.md`, mechanical fm fixes |
 
-After `/tmb:create` finishes, `research.yaml` is read-only ground truth. `/tmb:add-module` reads but does not modify it. If the researcher's findings need updating (a source moved, a term changed meaning), the user re-runs `/tmb:create` from a fresh directory — there is no "refresh research" subcommand in v0.4.
+After `/tmb:tmb-create` finishes, `research.yaml` is read-only ground truth. `/tmb:tmb-add-module` reads but does not modify it. If the researcher's findings need updating (a source moved, a term changed meaning), the user re-runs `/tmb:tmb-create` from a fresh directory — there is no "refresh research" subcommand in v0.4.
 
 ## Why the file matters for parallel module-builders
 

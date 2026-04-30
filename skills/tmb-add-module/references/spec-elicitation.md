@@ -1,6 +1,6 @@
-# Spec elicitation — `/tmb:add-module` Phase 1
+# Spec elicitation — `/tmb:tmb-add-module` Phase 1
 
-Loaded at Phase 1 of `/tmb:add-module` to collect the new module's specification. Holds the question script, pushback rules, and the cross-check against `research.yaml`.
+Loaded at Phase 1 of `/tmb:tmb-add-module` to collect the new module's specification. Holds the question script, pushback rules, and the cross-check against `research.yaml`.
 
 ## Question script
 
@@ -47,7 +47,7 @@ yq '.concept_map[] | select(.concept | test("^<concept-name>$"; "i")) | .concept
 
 For any concept not found, warn:
 
-> *"`<concept>` isn't in research.yaml. The designer will flag this as a research gap rather than guessing the definition. You can re-run `/tmb:create` with broader research, or pick a different concept that's already in the substrate."*
+> *"`<concept>` isn't in research.yaml. The designer will flag this as a research gap rather than guessing the definition. You can re-run `/tmb:tmb-create` with broader research, or pick a different concept that's already in the substrate."*
 
 Do NOT silently let the user add a concept that's not in the substrate — every module-builder reads `research.yaml` for canonical definitions, and missing concepts mean the builder can't ground its prose.
 

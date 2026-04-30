@@ -6,13 +6,13 @@ Major refactor. Claude Code CLI only; lean on Hugo + shell scripts for everythin
 
 ### Breaking
 
-- **Claude Code CLI only.** The plugin shells out to `hugo`, `bash`, `curl`, `jq`, and `yq`. It cannot run inside Claude Work or claude.ai. The marketplace description and README drop all "optional Hugo" hedging. v0.3 curricula keep working under v0.3 but `/tmb:rebuild-site` refuses to upgrade them — research.yaml has no automatic backfill.
-- **Skill names are prefixed `tmb-`** for picker disambiguation (`tmb-create`, `tmb-review`, `tmb-add-module`, `tmb-rebuild-site`, `tmb-help`). Slash commands stay short (`/tmb:create`, etc.) — the `commands/<name>.md` shim invokes the prefixed skill.
+- **Claude Code CLI only.** The plugin shells out to `hugo`, `bash`, `curl`, `jq`, and `yq`. It cannot run inside Claude Work or claude.ai. The marketplace description and README drop all "optional Hugo" hedging. v0.3 curricula keep working under v0.3 but `/tmb:tmb-rebuild-site` refuses to upgrade them — research.yaml has no automatic backfill.
+- **Slash commands and skill names are now consistently prefixed `tmb-`** — every command is `/tmb:tmb-<name>` (e.g., `/tmb:tmb-create`, `/tmb:tmb-review`, `/tmb:tmb-add-module`, `/tmb:tmb-rebuild-site`, `/tmb:tmb-help`). Skill `name:` fields, `commands/*.md` filenames, and every doc reference all use the same form. v0.3 used the bare `/tmb:create` form — your muscle memory will need to update.
 - **Module frontmatter is now bootstrapped, not authored.** `scripts/new-module.sh` runs `hugo new modules/<slug>/index.md` against an enriched archetype, then patches every brief-sourced field with `yq`. The module-builder agent only writes body content; it must not modify frontmatter. Reviewer's `check-frontmatter.sh` will flag any drift.
 
 ### Added
 
-- **`tmb-researcher` agent + `research.yaml`.** Runs once at the start of `/tmb:create`, between the interview and the designer. Produces a canonical glossary, sourced reading list with section anchors, concept map, common contrasts, and authority list. Every downstream agent reads it; nobody else writes it. Eliminates duplicated, divergent web research across parallel module-builders. Schema in `references/research-schema.md`.
+- **`tmb-researcher` agent + `research.yaml`.** Runs once at the start of `/tmb:tmb-create`, between the interview and the designer. Produces a canonical glossary, sourced reading list with section anchors, concept map, common contrasts, and authority list. Every downstream agent reads it; nobody else writes it. Eliminates duplicated, divergent web research across parallel module-builders. Schema in `references/research-schema.md`.
 - **Determinism scripts.** Every check that can be expressed as a shell script is one. The reviewer agent calls these instead of reimplementing the logic in prose:
   - `scripts/check-deps.sh` — unified preflight (hugo + yq + jq + curl).
   - `scripts/validate-research.sh` — gate on research.yaml completeness.
@@ -38,7 +38,9 @@ Major refactor. Claude Code CLI only; lean on Hugo + shell scripts for everythin
 
 ### Migration from 0.3.x
 
-There is no automatic migration. v0.3 curricula keep working under v0.3. To take a v0.3 curriculum to v0.4, re-run `/tmb:create` from a fresh directory; the research substrate cannot be reverse-engineered from existing module pages.
+There is no automatic migration. v0.3 curricula keep working under v0.3. To take a v0.3 curriculum to v0.4, re-run `/tmb:tmb-create` from a fresh directory; the research substrate cannot be reverse-engineered from existing module pages.
+
+Slash command form changed: `/tmb:create` → `/tmb:tmb-create` (and the same for every other command). Update any docs, dashboards, or muscle memory accordingly.
 
 ## 0.3.0 — 2026-04 (in progress)
 

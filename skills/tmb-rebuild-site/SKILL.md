@@ -3,7 +3,7 @@ name: tmb-rebuild-site
 description: >
   Use this skill when the user asks to refresh the Hugo layouts of an existing
   curriculum or rebuild the static site after a plugin upgrade. Triggers on
-  "/tmb:rebuild-site", "refresh the site layouts", "rebuild the Hugo scaffold",
+  "/tmb:tmb-rebuild-site", "refresh the site layouts", "rebuild the Hugo scaffold",
   "upgrade the site templates". Touches only site/layouts/, site/assets/css/,
   site/archetypes/, and site/hugo.yaml — never site/content/ or modules/.
 user_summary: >
@@ -14,7 +14,7 @@ argument-hint: "<no arguments — operates on cwd>"
 allowed-tools: [Read, Write, Bash]
 ---
 
-# /tmb:rebuild-site
+# /tmb:tmb-rebuild-site
 
 Refresh Hugo infrastructure in an existing curriculum without rewriting content, then rebuild.
 
@@ -39,7 +39,7 @@ Branch on `state`:
 - `v0.2` — refuse with the v0.2 message.
 - Anything else — refuse: *"This directory does not look like a TMB curriculum (state: <X>)."*
 
-If `site/` is missing entirely, refuse: *"No site/ directory found. If you want to scaffold one, run /tmb:create."* Do not try to scaffold a site against existing content — the content wasn't written against this layout.
+If `site/` is missing entirely, refuse: *"No site/ directory found. If you want to scaffold one, run /tmb:tmb-create."* Do not try to scaffold a site against existing content — the content wasn't written against this layout.
 
 ## Phase 1: Refresh layouts
 
@@ -71,7 +71,7 @@ If a server is running, restart it to pick up layout changes:
   ./stop.sh && ./serve.sh
 ```
 
-If no server is running, offer to start one (same tmux-or-fallback flow as `/tmb:create`).
+If no server is running, offer to start one (same tmux-or-fallback flow as `/tmb:tmb-create`).
 
 ## Boundaries
 

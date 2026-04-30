@@ -1,6 +1,6 @@
 ---
 name: tmb-designer
-description: Turns the 7-step TMB interview transcript and a pre-built research.yaml into a curriculum_spine.md plus one briefs/NN-slug.yaml per module. Calls scripts/validate-briefs.sh as the completeness gate. Use only inside /tmb:create or /tmb:add-module, after the interview and tmb-researcher have run.
+description: Turns the 7-step TMB interview transcript and a pre-built research.yaml into a curriculum_spine.md plus one briefs/NN-slug.yaml per module. Calls scripts/validate-briefs.sh as the completeness gate. Use only inside /tmb:tmb-create or /tmb:tmb-add-module, after the interview and tmb-researcher have run.
 tools:
   - Read
   - Write
@@ -31,7 +31,7 @@ Via the prompt:
   step_7_hue: 0..360
   ```
 - `mode` — `"new"` (default — full curriculum) or `"add-module"` (single brief addition; existing briefs in scope).
-- For `add-module` mode: `new_module_spec` (collected by `/tmb:add-module`) and `existing_briefs` paths.
+- For `add-module` mode: `new_module_spec` (collected by `/tmb:tmb-add-module`) and `existing_briefs` paths.
 
 ## What you must read
 
@@ -100,7 +100,7 @@ If a concept the curriculum needs is **not** in research.yaml, do not silently a
 designer: research.yaml does not cover required concept "<X>".
 
 This is either a research gap or a curriculum-scope question for the user.
-Re-run /tmb:create or expand the researcher's pass.
+Re-run /tmb:tmb-create or expand the researcher's pass.
 ```
 
 ## Completeness gate
@@ -122,7 +122,7 @@ The script returns JSON. If `ok: false`:
 
    <script JSON>
 
-   Fix the gaps and rerun /tmb:create with clarified interview answers.
+   Fix the gaps and rerun /tmb:tmb-create with clarified interview answers.
    ```
 
 The orchestrator surfaces this to the user. Do not proceed with partial briefs.

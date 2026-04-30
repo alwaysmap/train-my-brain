@@ -4,7 +4,7 @@ Hugo is a tool that turns markdown files into a browsable website. In a TMB curr
 
 ## Version and install
 
-Hugo ≥ 0.120 (extended edition). The plugin ships a helper — `scripts/check-hugo.sh` (POSIX) or `scripts/check-hugo.ps1` (Windows) — that detects missing or outdated Hugo and offers a platform-appropriate install (`brew install hugo-extended`, `winget install Hugo.Hugo.Extended`, `snap install hugo --classic`, or `apt install hugo`). On decline, the helper prints the release URL — currently <https://github.com/gohugoio/hugo/releases/tag/v0.160.1> — and exits. Every orchestrator (`/tmb:create`, `/tmb:rebuild-site`, `/tmb:add-module`) calls this helper before anything else.
+Hugo ≥ 0.120 (extended edition). The plugin ships a helper — `scripts/check-hugo.sh` (POSIX) or `scripts/check-hugo.ps1` (Windows) — that detects missing or outdated Hugo and offers a platform-appropriate install (`brew install hugo-extended`, `winget install Hugo.Hugo.Extended`, `snap install hugo --classic`, or `apt install hugo`). On decline, the helper prints the release URL — currently <https://github.com/gohugoio/hugo/releases/tag/v0.160.1> — and exits. Every orchestrator (`/tmb:tmb-create`, `/tmb:tmb-rebuild-site`, `/tmb:tmb-add-module`) calls this helper before anything else.
 
 ## Where the site lives
 
@@ -26,7 +26,7 @@ Each generated curriculum gets its own `site/` subdirectory:
     └── public/                    # written by ./build.sh
 ```
 
-All layouts, CSS, and the archetype are written by `scripts/scaffold-site.sh` (embedded heredocs). A user never edits them directly. If the plugin's scaffold templates evolve, `/tmb:rebuild-site --layouts-only` refreshes them without touching `content/`.
+All layouts, CSS, and the archetype are written by `scripts/scaffold-site.sh` (embedded heredocs). A user never edits them directly. If the plugin's scaffold templates evolve, `/tmb:tmb-rebuild-site --layouts-only` refreshes them without touching `content/`.
 
 ## Frontmatter contract
 

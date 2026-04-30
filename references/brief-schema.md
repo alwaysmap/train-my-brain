@@ -71,7 +71,7 @@ Before dispatching any module builder, the designer agent validates every brief:
 - `reading.primary` and `reading.secondary` URLs are HTTP(S) URLs (no `[TODO: find URL]` markers — those are caught by the reviewer at write time, but the designer must not emit them).
 - `exercise_goal` contains at least two `[TODO:` markers.
 
-If any brief fails, `/tmb:create` aborts with a clear error listing every gap in every brief. The designer does not dispatch builders with incomplete context.
+If any brief fails, `/tmb:tmb-create` aborts with a clear error listing every gap in every brief. The designer does not dispatch builders with incomplete context.
 
 ## Why briefs, not prose
 

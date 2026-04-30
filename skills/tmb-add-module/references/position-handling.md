@@ -1,6 +1,6 @@
-# Position handling — `/tmb:add-module` Phase 2
+# Position handling — `/tmb:tmb-add-module` Phase 2
 
-Loaded at Phase 2 of `/tmb:add-module` to figure out what `weight` the new module gets and what side-effects that has on existing modules. Two modes: append and insert-at-K.
+Loaded at Phase 2 of `/tmb:tmb-add-module` to figure out what `weight` the new module gets and what side-effects that has on existing modules. Two modes: append and insert-at-K.
 
 ## Read current state
 
