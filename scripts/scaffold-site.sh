@@ -110,7 +110,7 @@ fi
 
 cat > "$TARGET/site/hugo.yaml" <<EOF
 baseURL: /
-languageCode: en-us
+defaultContentLanguage: en
 title: "$TITLE"
 paginate: 20
 
@@ -144,6 +144,20 @@ next_expects: ""
 date: {{ .Date }}
 draft: false
 ---
+
+<!--
+  Module body. The frontmatter above is bootstrapped from the archetype and
+  patched by scripts/new-module.sh from the per-module brief. The agent fills
+  this body in; it must NOT modify the frontmatter.
+
+  Body structure (per references/curriculum-design.md):
+    1. Driving question — one paragraph anchored in spine.running_example.
+    2. Mechanism — walk through concepts, terms looked up from research.yaml.
+    3. Contrast table — at least 3 rows including when alternative wins.
+    4. What this means for [running example] — concrete grounding.
+    5. Reading — primary + secondary URLs verbatim from brief.
+    6. Coming next — one sentence mirroring next_expects.
+-->
 EOF
 
 cat > "$TARGET/site/archetypes/glossary.md" <<'EOF'

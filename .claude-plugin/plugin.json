@@ -1,8 +1,8 @@
 {
   "name": "tmb",
   "displayName": "Train My Brain",
-  "version": "0.3.0",
-  "description": "A learning curriculum builder that interviews you about your goal, designs a structured hands-on curriculum, and builds a local Hugo site with exercises, validation, and post-build consistency review.",
+  "version": "0.4.0",
+  "description": "A Claude Code curriculum builder. Interviews you about your goal, researches the topic once up-front, designs a hands-on module sequence, then dispatches parallel module-builders that share canonical sources. Ships a local Hugo site with exercises, validation, and a deterministic consistency reviewer.",
   "author": {
     "name": "Dylan Thomas",
     "email": "dylan@alwaysmap.com"
@@ -15,7 +15,8 @@
     "curriculum",
     "study-plan",
     "education",
-    "career"
+    "career",
+    "claude-code"
   ],
   "skills": "./skills",
   "agents": "./agents",

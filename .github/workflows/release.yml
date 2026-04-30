@@ -23,14 +23,14 @@ jobs:
             agents/ \
             commands/ \
             references/ \
-            scripts/check-hugo.sh \
-            scripts/check-hugo.ps1 \
-            scripts/scaffold-site.sh \
+            scripts/ \
             curriculum-templates/ \
             README.md \
             LICENSE \
             CHANGELOG.md \
-            -x "*/.DS_Store"
+            -x "*/.DS_Store" \
+            -x "scripts/build.sh" \
+            -x "scripts/release.sh"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
