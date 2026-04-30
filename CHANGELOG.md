@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 — 2026-04-30
+
+### Fixed
+
+- **Plugin manifest validation.** `plugin.json` no longer declares `skills`, `agents`, or `commands` path fields. The current Claude Code plugin loader rejects those (`agents: Invalid input`), and the conventional directories are auto-discovered without them. v0.4.0 was uninstallable — install v0.4.1 instead.
+
 ## 0.4.0 — 2026-04-30
 
 Major refactor. Claude Code CLI only; lean on Hugo + shell scripts for everything that can be deterministic; share a single research substrate across parallel module-builders.
