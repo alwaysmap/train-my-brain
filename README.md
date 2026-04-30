@@ -6,8 +6,17 @@ A Claude Code plugin that builds structured, hands-on learning curricula. It int
 
 ## Quick Start
 
-1. Install the plugin from the alwaysmap marketplace (`/plugin install tmb@alwaysmap`).
-2. From any directory where you want the curriculum to live, type `/tmb:help` to see the commands, or jump straight to `/tmb:create`.
+1. **Install dependencies.** TMB shells out to four CLIs at runtime: `hugo` (extended), `yq`, `jq`, and `curl`. Run the preflight to check what's already installed and get an interactive install offer for what's missing:
+
+   ```sh
+   bash scripts/check-deps.sh
+   ```
+
+   On macOS with Homebrew this offers `brew install <missing>` interactively. On Linux it prints copy-paste commands (snap / apt / direct download — we don't auto-elevate `sudo`). See [Requirements](#requirements) for the full list and per-platform commands.
+
+2. **Install the plugin** from the alwaysmap marketplace: `/plugin install tmb@alwaysmap`.
+
+3. From any directory where you want a curriculum to live, type `/tmb:help` to see commands, or jump straight to `/tmb:create`. The skill calls `check-deps.sh` as Phase 0 — if anything is missing, you'll get an install prompt before the interview starts.
 
 ## Commands
 
@@ -48,9 +57,34 @@ If you don't trust an LLM to never skip a step, run any of these directly agains
 
 ## Requirements
 
-- Claude Code CLI (macOS, Linux, or Windows with WSL).
-- Hugo ≥ 0.120 (Hugo Extended). If it isn't installed when you run `/tmb:create`, the plugin offers a platform-appropriate install command (`brew`, `winget`, `snap`).
-- `yq` and `curl` on PATH (the determinism scripts call them).
+| Tool | Why TMB needs it | macOS (Homebrew) | Linux (snap) | Linux (apt) |
+|---|---|---|---|---|
+| **Claude Code CLI** | The plugin host. | `brew install --cask claude` | n/a — download from claude.ai | n/a |
+| **Hugo (extended) ≥ 0.120** | Site generation, archetypes, layouts. | `brew install hugo` | `sudo snap install hugo --classic` | apt's package is often stale — prefer the [upstream `.deb`](https://github.com/gohugoio/hugo/releases) |
+| **yq** (Mike Farah, Go-based) | Reads/patches nested YAML in briefs, frontmatter, and `research.yaml`. | `brew install yq` | `sudo snap install yq` | Download single binary from [`mikefarah/yq`](https://github.com/mikefarah/yq#install) |
+| **jq** | JSON munging in the determinism scripts. | `brew install jq` | `sudo apt-get install -y jq` | `sudo apt-get install -y jq` |
+| **curl** | URL reachability checks. | preinstalled | preinstalled | preinstalled |
+
+### One-shot install
+
+```sh
+# macOS
+brew install hugo yq jq
+
+# Debian/Ubuntu (snap available)
+sudo snap install hugo --classic && sudo snap install yq && sudo apt-get install -y jq
+
+# Anywhere — let TMB tell you what's missing and how to install it
+bash scripts/check-deps.sh
+```
+
+`check-deps.sh` is also Phase 0 of `/tmb:create`, `/tmb:review`, `/tmb:add-module`, and `/tmb:rebuild-site` — every entry point validates the runtime before doing anything else. On macOS it offers an interactive `brew install` for whatever is missing. On Linux it prints copy-paste commands (we do not auto-elevate `sudo`).
+
+### Platform support
+
+- **macOS** — first-class. Homebrew is the assumed package manager.
+- **Linux** — first-class. snap or apt+upstream binaries.
+- **Windows** — supported via WSL (use the Linux instructions inside your WSL distro). Native Windows is untested; PowerShell counterparts ship for `serve.ps1` / `build.ps1` / `stop.ps1` but the determinism scripts assume bash.
 
 ## About
 

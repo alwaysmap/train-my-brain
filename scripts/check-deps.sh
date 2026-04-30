@@ -1,20 +1,29 @@
 #!/usr/bin/env bash
-# check-deps.sh — Verify every TMB v0.4 runtime dependency.
+# check-deps.sh — Verify every TMB v0.4 runtime dependency, offer to install
+# any that are missing.
 #
 # Required:
-#   - hugo (extended) >= 0.120
-#   - yq                (Mike Farah, Go-based)
-#   - jq
-#   - curl
+#   - hugo (extended) >= 0.120 — site generation, archetypes, layouts.
+#   - yq                       — read/patch nested YAML in briefs, frontmatter,
+#                                research.yaml. Single static Go binary.
+#   - jq                       — JSON munging in the determinism scripts.
+#   - curl                     — URL reachability checks.
 #
 # Behavior:
-#   - For each missing tool, prints a clear platform-appropriate install
-#     command. On macOS w/ brew, offers to install interactively.
-#   - Exits 0 only when all four are present and Hugo is recent enough.
-#   - Exits 1 if anything is missing or stale.
+#   1. Lists what's present and what's missing.
+#   2. macOS + brew (unprivileged):
+#        Offers to run `brew install <missing>` interactively.
+#   3. Linux + snap (privileged via sudo): prints copy-paste commands.
+#   4. Linux + apt (privileged via sudo): prints copy-paste commands.
+#   5. Any other env: prints upstream download URLs.
 #
-# Skills should call this once at the start of any pipeline that uses the
-# determinism scripts. /tmb:create runs it as Phase 0.
+# We do not auto-elevate (no `sudo` from inside the script). Users who don't
+# have brew get a one-line block they can copy.
+#
+# Exits 0 only when all four are present at acceptable versions.
+# Exits 1 if anything is missing or stale.
+#
+# Skills call this at the start of any pipeline. /tmb:create runs it as Phase 0.
 
 set -euo pipefail
 
@@ -29,9 +38,7 @@ ver_ge() {
 
 prompt_yn() {
   local q="$1" ans
-  if [ ! -t 0 ]; then
-    return 1
-  fi
+  [ -t 0 ] || return 1
   printf '%s [y/N] ' "$q"
   read -r ans || return 1
   case "$ans" in [yY]|[yY][eE][sS]) return 0 ;; *) return 1 ;; esac
@@ -43,6 +50,9 @@ case "$(uname -s)" in
   Linux)  os="linux" ;;
 esac
 
+echo "TMB dependency check"
+echo "────────────────────"
+
 missing=()
 
 # ── hugo ──────────────────────────────────────────────────────
@@ -51,62 +61,104 @@ if command -v hugo >/dev/null 2>&1; then
   if ver_ge "$hv" "$MIN_HUGO"; then
     echo "✓ hugo $hv"
   else
-    echo "✗ hugo $hv is older than required $MIN_HUGO"
+    echo "✗ hugo $hv (need >= $MIN_HUGO)"
     missing+=("hugo")
   fi
 else
-  echo "✗ hugo is not installed (need >= $MIN_HUGO, suggested $SUGGESTED_HUGO)"
+  echo "✗ hugo not found (need >= $MIN_HUGO, suggested $SUGGESTED_HUGO)"
   missing+=("hugo")
 fi
 
 # ── yq, jq, curl ──────────────────────────────────────────────
 for tool in yq jq curl; do
   if command -v "$tool" >/dev/null 2>&1; then
-    echo "✓ $tool $($tool --version 2>&1 | head -1)"
+    v=$("$tool" --version 2>&1 | head -1)
+    echo "✓ $tool ($v)"
   else
-    echo "✗ $tool is not installed"
+    echo "✗ $tool not found"
     missing+=("$tool")
   fi
 done
 
 # ── Offer install ─────────────────────────────────────────────
 if [ ${#missing[@]} -eq 0 ]; then
+  echo
   echo "All TMB dependencies satisfied."
   exit 0
 fi
 
 echo
-echo "Missing dependencies: ${missing[*]}"
+echo "Missing: ${missing[*]}"
+echo
 
-if [ "$os" = "macos" ] && command -v brew >/dev/null 2>&1; then
-  cmd="brew install ${missing[*]}"
-  echo "Suggested: $cmd"
-  if prompt_yn "Run it now?"; then
-    eval "$cmd"
+if [ "$os" = "macos" ]; then
+  if command -v brew >/dev/null 2>&1; then
+    cmd="brew install ${missing[*]}"
+    echo "macOS — Homebrew available."
+    echo "  $cmd"
     echo
-    echo "Re-run scripts/check-deps.sh to verify."
-    exit 0
+    if prompt_yn "Install now?"; then
+      eval "$cmd"
+      echo
+      echo "Re-run: bash scripts/check-deps.sh"
+      exit 0
+    fi
+    echo "Skipped install. Run the command above when ready."
+  else
+    echo "macOS — Homebrew not detected. Install brew first:"
+    echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    echo
+    echo "Then:"
+    echo "  brew install ${missing[*]}"
   fi
 elif [ "$os" = "linux" ]; then
+  echo "Linux — copy-paste install (we don't auto-elevate sudo):"
+  echo
   if command -v snap >/dev/null 2>&1; then
-    echo "Suggested (snap):"
     for m in "${missing[@]}"; do
       case "$m" in
         hugo) echo "  sudo snap install hugo --classic" ;;
         yq)   echo "  sudo snap install yq" ;;
-        jq)   echo "  sudo apt-get install -y jq    # snap doesn't ship jq cleanly" ;;
+        jq)   echo "  sudo apt-get install -y jq" ;;
         curl) echo "  sudo apt-get install -y curl" ;;
       esac
     done
   elif command -v apt-get >/dev/null 2>&1; then
-    echo "Suggested (apt — note: apt's hugo is often stale):"
-    echo "  sudo apt-get install -y ${missing[*]}"
+    apt_pkgs=()
+    for m in "${missing[@]}"; do
+      case "$m" in
+        hugo) echo "  # apt's hugo is often stale; prefer the upstream binary:"
+              echo "  curl -L -o /tmp/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${SUGGESTED_HUGO}/hugo_extended_${SUGGESTED_HUGO}_linux-amd64.deb"
+              echo "  sudo dpkg -i /tmp/hugo.deb" ;;
+        yq)   echo "  sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+              echo "  sudo chmod +x /usr/local/bin/yq" ;;
+        *)    apt_pkgs+=("$m") ;;
+      esac
+    done
+    [ ${#apt_pkgs[@]} -gt 0 ] && echo "  sudo apt-get install -y ${apt_pkgs[*]}"
+  elif command -v dnf >/dev/null 2>&1; then
+    echo "  sudo dnf install -y ${missing[*]}"
+  else
+    echo "  No known package manager. Install each from upstream:"
+    for m in "${missing[@]}"; do
+      case "$m" in
+        hugo) echo "  hugo: https://github.com/gohugoio/hugo/releases" ;;
+        yq)   echo "  yq:   https://github.com/mikefarah/yq#install" ;;
+        jq)   echo "  jq:   https://jqlang.github.io/jq/download/" ;;
+        curl) echo "  curl: usually preinstalled; check your distro" ;;
+      esac
+    done
   fi
 else
-  echo "Install each tool from its upstream:"
-  echo "  hugo: https://github.com/gohugoio/hugo/releases"
-  echo "  yq:   https://github.com/mikefarah/yq#install"
-  echo "  jq:   https://jqlang.github.io/jq/download/"
+  echo "Install each from upstream:"
+  for m in "${missing[@]}"; do
+    case "$m" in
+      hugo) echo "  hugo: https://github.com/gohugoio/hugo/releases" ;;
+      yq)   echo "  yq:   https://github.com/mikefarah/yq#install" ;;
+      jq)   echo "  jq:   https://jqlang.github.io/jq/download/" ;;
+      curl) echo "  curl: usually preinstalled; check your distro" ;;
+    esac
+  done
 fi
 
 exit 1

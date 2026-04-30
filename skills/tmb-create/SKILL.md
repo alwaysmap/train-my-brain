@@ -43,7 +43,13 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 bash scripts/check-deps.sh
 ```
 
-On non-zero exit, propagate verbatim and stop. Do not attempt to install dependencies yourself.
+The script verifies hugo (extended), yq, jq, and curl are present. If anything is missing:
+
+- **macOS + brew**: the script offers `brew install <missing>` interactively. The user types `y` to install.
+- **Linux**: the script prints copy-paste commands (snap / apt / direct download — TMB does not auto-elevate `sudo`).
+- **Anything else**: upstream URLs are printed.
+
+If the script exits non-zero, propagate its output verbatim and stop. The user must complete the install (or accept the interactive offer) before you can proceed. Do not attempt to install dependencies yourself outside the script's flow — `check-deps.sh` already handles every platform we support.
 
 ### Phase 1: Interview
 

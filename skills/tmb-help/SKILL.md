@@ -51,12 +51,18 @@ Train My Brain (TMB) — commands
 
 Requirements
   Claude Code CLI (macOS / Linux / Windows-WSL).
-  Hugo >= 0.120 (extended). /tmb:create offers a one-line install if missing.
-  yq and curl on PATH (used by the determinism scripts).
+  hugo (extended) >= 0.120, yq, jq, curl — used by the determinism scripts.
+
+  Run the preflight any time:
+      bash scripts/check-deps.sh
+  On macOS+brew it offers `brew install <missing>` interactively. On Linux
+  it prints copy-paste install commands (no auto-sudo). Every TMB command
+  runs this same preflight as Phase 0, so you can also just run /tmb:create
+  and let it tell you what's missing.
 
 More
   CHANGELOG.md for v0.4 release notes
-  README.md for quick-start and the determinism contract
+  README.md for the full per-platform install matrix
 ```
 
 Do not run any tools. This skill is pure text.
