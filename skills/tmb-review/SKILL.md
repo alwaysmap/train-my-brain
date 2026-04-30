@@ -45,7 +45,7 @@ Branch on the JSON `state`:
 - `v0.2` — refuse with the same v0.2-not-supported message v0.3 used.
 - `non-tmb` or `fresh` — refuse: *"This directory does not look like a TMB curriculum (state: <X>). Run /tmb:create to start one."*
 
-## Mode selection
+## Phase 1: Mode selection
 
 If `review.md` already exists and contains any flag with `approved: true` that has not been `applied: true`, ask:
 
@@ -55,7 +55,7 @@ If `review.md` already exists and contains any flag with `approved: true` that h
 - `fresh` → dispatch with `mode: "full"`.
 - Default if no review.md exists: `mode: "full"`.
 
-## Dispatch
+## Phase 2: Dispatch
 
 ```
 Agent(
@@ -66,7 +66,7 @@ Agent(
 
 The agent runs the determinism scripts, applies mechanical fixes, merges the glossary, and writes `review.md`. You do not duplicate any of that logic.
 
-## After the agent returns
+## Phase 3: Summarize
 
 Read `review.md` and summarize:
 

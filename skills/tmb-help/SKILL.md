@@ -7,7 +7,7 @@ description: >
 user_summary: >
   Show every TMB command and what it does — a one-screen summary.
 version: 0.4.0
-argument-hint: <none>
+argument-hint: ""
 allowed-tools: []
 ---
 
