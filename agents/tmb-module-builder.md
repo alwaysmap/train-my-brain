@@ -1,6 +1,6 @@
 ---
 name: tmb-module-builder
-description: Writes one module of a TMB curriculum — concept page, validation page, and at least one exercise — as Hugo content under site/content/modules/<slug>/. Each module is a Hugo branch bundle so concept, validation, and exercises all get real URLs. Use only inside /tmb:tmb-create or /tmb:tmb-add-module, dispatched one builder per module. Each builder sees only its own brief, the spine, and research.yaml; it never reads sibling modules.
+description: Writes one module of a TMB curriculum — concept page, validation page, and at least one exercise — as Hugo content under site/content/modules/<slug>/. Each module is a Hugo branch bundle so concept, validation, and exercises all get real URLs. Use only inside /tmb:create or /tmb:add-module, dispatched one builder per module. Each builder sees only its own brief, the spine, and research.yaml; it never reads sibling modules.
 tools:
   - Read
   - Write

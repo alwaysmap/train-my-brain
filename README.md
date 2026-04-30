@@ -37,7 +37,7 @@ TMB shells out to four CLIs at runtime: `hugo` (extended), `yq`, `jq`, and `curl
 bash $(claude plugin path tmb@alwaysmap)/scripts/check-deps.sh
 ```
 
-Or just run `/tmb:tmb-create` — it calls `check-deps.sh` as Phase 0 and offers install before the interview starts.
+Or just run `/tmb:create` — it calls `check-deps.sh` as Phase 0 and offers install before the interview starts.
 
 On macOS with Homebrew this offers `brew install <missing>` interactively. On Linux it prints copy-paste commands (snap / apt / direct download — we don't auto-elevate `sudo`). See [Requirements](#requirements) below for the full per-platform install matrix.
 
@@ -46,11 +46,11 @@ On macOS with Homebrew this offers `brew install <missing>` interactively. On Li
 From any directory where you want a curriculum to live:
 
 ```
-/tmb:tmb-help       # see every command
-/tmb:tmb-create     # build a curriculum
+/tmb:help       # see every command
+/tmb:create     # build a curriculum
 ```
 
-`/tmb:tmb-create` walks you through a 7-question interview, then runs autonomously for ~6–10 minutes (research → design → scaffold → parallel module-builders → reviewer → build → serve). At the end you get a working Hugo site at `http://localhost:1313`.
+`/tmb:create` walks you through a 7-question interview, then runs autonomously for ~6–10 minutes (research → design → scaffold → parallel module-builders → reviewer → build → serve). At the end you get a working Hugo site at `http://localhost:1313`.
 
 Want to publish it online? See [Publishing online (GitHub Pages)](#publishing-online-github-pages).
 
@@ -58,13 +58,13 @@ Want to publish it online? See [Publishing online (GitHub Pages)](#publishing-on
 
 | Command | What it does |
 |---|---|
-| `/tmb:tmb-create` | Full pipeline: 8-step interview → topic research (`research.yaml`) → design phase → Hugo scaffold → parallel module builders → consistency reviewer → build → serve. Scaffolds into `<cwd>/<slug>/`. |
-| `/tmb:tmb-review` | Re-runs the consistency reviewer against an existing curriculum. Calls deterministic scripts for adjacency, frontmatter, URL reachability, AI-prose regex, and glossary merge. |
-| `/tmb:tmb-add-module` | Adds one module to an existing curriculum. Supports append and insert-at-position-K (shifts later modules' weights mechanically). |
-| `/tmb:tmb-rebuild-site` | Refreshes Hugo layouts / CSS / config without touching `content/` or `modules/`, then rebuilds `site/public/`. |
-| `/tmb:tmb-help` | Lists the commands and their purpose. |
+| `/tmb:create` | Full pipeline: 8-step interview → topic research (`research.yaml`) → design phase → Hugo scaffold → parallel module builders → consistency reviewer → build → serve. Scaffolds into `<cwd>/<slug>/`. |
+| `/tmb:review` | Re-runs the consistency reviewer against an existing curriculum. Calls deterministic scripts for adjacency, frontmatter, URL reachability, AI-prose regex, and glossary merge. |
+| `/tmb:add-module` | Adds one module to an existing curriculum. Supports append and insert-at-position-K (shifts later modules' weights mechanically). |
+| `/tmb:rebuild-site` | Refreshes Hugo layouts / CSS / config without touching `content/` or `modules/`, then rebuilds `site/public/`. |
+| `/tmb:help` | Lists the commands and their purpose. |
 
-## What `/tmb:tmb-create` produces
+## What `/tmb:create` produces
 
 A folder at `<cwd>/<topic-slug>/` containing:
 
@@ -114,7 +114,7 @@ sudo snap install hugo --classic && sudo snap install yq && sudo apt-get install
 bash scripts/check-deps.sh
 ```
 
-`check-deps.sh` is also Phase 0 of `/tmb:tmb-create`, `/tmb:tmb-review`, `/tmb:tmb-add-module`, and `/tmb:tmb-rebuild-site` — every entry point validates the runtime before doing anything else. On macOS it offers an interactive `brew install` for whatever is missing. On Linux it prints copy-paste commands (we do not auto-elevate `sudo`).
+`check-deps.sh` is also Phase 0 of `/tmb:create`, `/tmb:review`, `/tmb:add-module`, and `/tmb:rebuild-site` — every entry point validates the runtime before doing anything else. On macOS it offers an interactive `brew install` for whatever is missing. On Linux it prints copy-paste commands (we do not auto-elevate `sudo`).
 
 ### Platform support
 

@@ -8,7 +8,7 @@ You do not need to know GitHub Actions or Hugo to follow these steps — copy-pa
 
 - A GitHub account.
 - The [`gh` CLI](https://cli.github.com/) installed and authenticated (`gh auth login`). If you'd rather not install `gh`, the manual `git remote add` path works too — both are below.
-- Your TMB curriculum directory built locally (you've already run `/tmb:tmb-create` and `./build.sh` succeeded — you can see the site at http://localhost:1313).
+- Your TMB curriculum directory built locally (you've already run `/tmb:create` and `./build.sh` succeeded — you can see the site at http://localhost:1313).
 
 ## Step 1: Initialize the curriculum as a git repository
 
@@ -77,7 +77,7 @@ If you see a 404, wait another minute and refresh. If it persists, jump to [Trou
 
 ## Updating the site
 
-Every push to `main` rebuilds and redeploys automatically — there's no manual step. After running `/tmb:tmb-add-module` or `/tmb:tmb-review`:
+Every push to `main` rebuilds and redeploys automatically — there's no manual step. After running `/tmb:add-module` or `/tmb:review`:
 
 ```sh
 git add .
@@ -128,4 +128,4 @@ For reference (you don't need to edit this file — TMB ships a working version)
 - Uploads `site/public` as the Pages artifact.
 - Deploys via `actions/deploy-pages@v4`.
 
-If you genuinely need to customize the workflow (e.g., deploy only a subdirectory), edit `.github/workflows/deploy.yml` directly. The TMB plugin won't overwrite it on `/tmb:tmb-rebuild-site` — that command only refreshes Hugo layouts inside `site/`.
+If you genuinely need to customize the workflow (e.g., deploy only a subdirectory), edit `.github/workflows/deploy.yml` directly. The TMB plugin won't overwrite it on `/tmb:rebuild-site` — that command only refreshes Hugo layouts inside `site/`.

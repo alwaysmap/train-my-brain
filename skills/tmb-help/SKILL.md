@@ -1,7 +1,7 @@
 ---
 name: tmb-help
 description: >
-  Use this skill when the user types /tmb:tmb-help, asks "what can the tmb plugin
+  Use this skill when the user types /tmb:help, asks "what can the tmb plugin
   do", "show TMB commands", or seems unsure which command to use. Pure-text
   output of every TMB slash command and what it does.
 user_summary: >
@@ -11,14 +11,14 @@ argument-hint: ""
 allowed-tools: []
 ---
 
-# /tmb:tmb-help
+# /tmb:help
 
 Print this verbatim:
 
 ```
 Train My Brain (TMB) — commands
 
-/tmb:tmb-create
+/tmb:create
     Full pipeline. Runs the 8-step interview, dispatches a one-shot topic
     researcher (writes research.yaml — canonical glossary, sourced reading
     list, concept map, contrasts, authorities), designs modules, scaffolds
@@ -27,26 +27,26 @@ Train My Brain (TMB) — commands
     consistency reviewer (deterministic scripts + substantive flags), builds
     the static output, and starts the server. Scaffolds into <cwd>/<topic-slug>/.
 
-/tmb:tmb-review
+/tmb:review
     Re-runs the consistency reviewer against an existing curriculum. The
     reviewer is a thin orchestrator over scripts/ — adjacency, frontmatter,
     URL reachability, glossary merge, AI-prose regex. Substantive flags
     land in review.md for your approval. Use after manual edits or after
     adding a module.
 
-/tmb:tmb-add-module
+/tmb:add-module
     Adds one module to an existing curriculum. Supports append (after the
     last module) and insert-at-position-K (shifts later modules' weights).
     Re-uses the existing research.yaml. Dispatches the designer for the
     new brief, one module-builder, and a scoped reviewer over the new
     module plus adjacency neighbors. Rebuilds the site after success.
 
-/tmb:tmb-rebuild-site
+/tmb:rebuild-site
     Refreshes Hugo layouts, CSS, config, and archetype for an existing
     curriculum without touching content/ or modules/. Rebuilds the static
     output. Use when the plugin's scaffold templates have evolved.
 
-/tmb:tmb-help
+/tmb:help
     Shows this message.
 
 Requirements
@@ -57,7 +57,7 @@ Requirements
       bash scripts/check-deps.sh
   On macOS+brew it offers `brew install <missing>` interactively. On Linux
   it prints copy-paste install commands (no auto-sudo). Every TMB command
-  runs this same preflight as Phase 0, so you can also just run /tmb:tmb-create
+  runs this same preflight as Phase 0, so you can also just run /tmb:create
   and let it tell you what's missing.
 
 Publishing online (GitHub Pages)

@@ -1,6 +1,6 @@
 ---
 name: tmb-reviewer
-description: Runs after module builders. Calls deterministic scripts for adjacency, frontmatter, URL reachability, AI-prose, and glossary merge — then triages any substantive findings into review.md for human approval. Use via /tmb:tmb-create (automatic post-build), /tmb:tmb-review (re-run), or /tmb:tmb-add-module (scoped to affected modules).
+description: Runs after module builders. Calls deterministic scripts for adjacency, frontmatter, URL reachability, AI-prose, and glossary merge — then triages any substantive findings into review.md for human approval. Use via /tmb:create (automatic post-build), /tmb:review (re-run), or /tmb:add-module (scoped to affected modules).
 tools:
   - Read
   - Write
@@ -26,8 +26,8 @@ Via the prompt:
 
 - `curriculum_root` — absolute path to the curriculum folder.
 - `mode` — one of:
-  - `full` — run against every module (default from `/tmb:tmb-create` and `/tmb:tmb-review`).
-  - `scoped` — run against a specific subset of modules (used by `/tmb:tmb-add-module`). The prompt includes `scope_modules: ["03-silica-viscosity", "04-gas-pressure"]`.
+  - `full` — run against every module (default from `/tmb:create` and `/tmb:review`).
+  - `scoped` — run against a specific subset of modules (used by `/tmb:add-module`). The prompt includes `scope_modules: ["03-silica-viscosity", "04-gas-pressure"]`.
   - `apply-approved` — re-run after the user has edited `review.md`; apply fixes whose `approved: true` and leave others untouched.
 
 ## Preconditions
@@ -178,7 +178,7 @@ If any script returns exit code 2 (setup error like missing yq), surface it verb
 
 ```
 reviewer: failed during phase <X> — script error: <verbatim>.
-Re-run /tmb:tmb-review after fixing.
+Re-run /tmb:review after fixing.
 ```
 
 The orchestrator continues with `./build.sh` anyway. Builder outputs are never discarded because the reviewer crashed.

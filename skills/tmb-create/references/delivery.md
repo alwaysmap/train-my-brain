@@ -1,6 +1,6 @@
 # Serve and deliver
 
-Loaded at the end of `/tmb:tmb-create` (Phase 10 + Phase 11). Holds the tmux readiness logic and the delivery-block template so the SKILL workflow stays tight.
+Loaded at the end of `/tmb:create` (Phase 10 + Phase 11). Holds the tmux readiness logic and the delivery-block template so the SKILL workflow stays tight.
 
 ## Phase 10: Serve
 
@@ -73,7 +73,7 @@ Want to publish this online?
 If `K > 0`, append:
 
 ```
-  Open review.md, set approved: true on flags to apply, then re-run /tmb:tmb-review.
+  Open review.md, set approved: true on flags to apply, then re-run /tmb:review.
 ```
 
 If the server didn't start, append:

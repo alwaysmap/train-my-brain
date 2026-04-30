@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.6 — 2026-04-30
+
+### Changed
+
+- **Slash command form: `/tmb:tmb-create` → `/tmb:create`.** v0.4.3 prefixed both the skill name AND the command-file name with `tmb-`, producing the doubly-namespaced `/tmb:tmb-<name>` slash form that nobody likes typing. Claude Code's plugin loader requires the `<plugin>:` colon prefix (it's not configurable), so the cleanest form is `/tmb:<command>`. Command files are now named `commands/<name>.md` (no `tmb-` prefix); skill names keep the `tmb-` prefix for picker disambiguation. Every doc/agent/skill/reference reference updated to the new form.
+
+  - `/tmb:tmb-create`        → `/tmb:create`
+  - `/tmb:tmb-review`        → `/tmb:review`
+  - `/tmb:tmb-add-module`    → `/tmb:add-module`
+  - `/tmb:tmb-rebuild-site`  → `/tmb:rebuild-site`
+  - `/tmb:tmb-help`          → `/tmb:help`
+
+  Skills (and the picker label form) stay `tmb-create`, `tmb-review`, `tmb-add-module`, `tmb-rebuild-site`, `tmb-help`. The shim `commands/<name>.md` invokes the `tmb-<name>` skill.
+
 ## 0.4.5 — 2026-04-30
 
 ### Changed

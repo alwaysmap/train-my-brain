@@ -1,6 +1,6 @@
 # Reviewer policy
 
-The `tmb-reviewer` agent runs after builders finish (in `/tmb:tmb-create`), on demand (via `/tmb:tmb-review`), and on a targeted subset after `/tmb:tmb-add-module`. It auto-fixes mechanical issues and flags substantive issues for user approval. This file is its authoritative policy.
+The `tmb-reviewer` agent runs after builders finish (in `/tmb:create`), on demand (via `/tmb:review`), and on a targeted subset after `/tmb:add-module`. It auto-fixes mechanical issues and flags substantive issues for user approval. This file is its authoritative policy.
 
 ## Two classes of issue
 
@@ -39,7 +39,7 @@ Substantive issues are written to `review.md` as numbered items with an `approve
 
 ## Drift direction (R34)
 
-When `/tmb:tmb-review` runs against a hand-edited curriculum:
+When `/tmb:review` runs against a hand-edited curriculum:
 
 - **Briefs are ground truth for frontmatter adjacency fields** (`driving_question`, `concepts`, `contrast`, `prior_ends_with`, `next_expects`, `weight`, `title`). If prose frontmatter differs from the brief, the reviewer flags "frontmatter drifted from brief" as substantive.
 - **Prose is ground truth for content**. The reviewer does not rewrite prose to match the brief. It only flags prose that *contradicts* the brief's hard constraints.
@@ -79,9 +79,9 @@ detail: |
 
 ## Reviewer crash containment (R37)
 
-If the reviewer errors mid-pass, the orchestrator does not halt the broader pipeline. `/tmb:tmb-create` proceeds to `./build.sh` and delivery; `review.md` contains whatever the reviewer had written before it crashed, with a footer: `review failed — re-run /tmb:tmb-review manually to complete`. Builder outputs are never discarded because of reviewer failure.
+If the reviewer errors mid-pass, the orchestrator does not halt the broader pipeline. `/tmb:create` proceeds to `./build.sh` and delivery; `review.md` contains whatever the reviewer had written before it crashed, with a footer: `review failed — re-run /tmb:review manually to complete`. Builder outputs are never discarded because of reviewer failure.
 
-## `/tmb:tmb-review` preconditions
+## `/tmb:review` preconditions
 
 - `curriculum_spine.md` must exist at the cwd.
 - `briefs/` must exist with at least one `NN-slug.yaml`.

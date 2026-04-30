@@ -2,7 +2,7 @@
 name: tmb-add-module
 description: >
   Use this skill when the user wants to add a single module to an existing
-  curriculum. Triggers on "/tmb:tmb-add-module", "add a module", "insert a module
+  curriculum. Triggers on "/tmb:add-module", "add a module", "insert a module
   at position N", "extend the curriculum". Supports append (default) and
   insert-at-position-K (shifts later modules' weights mechanically). Re-uses
   the existing research.yaml — no new web research. Dispatches the designer for
@@ -17,7 +17,7 @@ argument-hint: "[optional topic or position hint]"
 allowed-tools: [Read, Write, Bash, Agent]
 ---
 
-# /tmb:tmb-add-module
+# /tmb:add-module
 
 Add one module to an existing TMB v0.4 curriculum.
 
@@ -39,9 +39,9 @@ bash scripts/check-deps.sh
 bash scripts/detect-curriculum.sh "$(pwd)"
 ```
 
-Refuse unless `state` is `v0.4-complete`. (Partial means an unfinished `/tmb:tmb-create` — direct the user to resume that first.)
+Refuse unless `state` is `v0.4-complete`. (Partial means an unfinished `/tmb:create` — direct the user to resume that first.)
 
-Also confirm `research.yaml` exists. If missing: *"This curriculum was created before v0.4 (no research.yaml). Add-module needs the research substrate. Re-run /tmb:tmb-create to migrate."*
+Also confirm `research.yaml` exists. If missing: *"This curriculum was created before v0.4 (no research.yaml). Add-module needs the research substrate. Re-run /tmb:create to migrate."*
 
 ### Phase 1: Collect the new module's spec
 
