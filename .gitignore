@@ -4,3 +4,6 @@ site/public/
 site/resources/_gen/
 site/.hugo_build.lock
 .DS_Store
+
+# Claude Code workspace state — never committed.
+.claude/
