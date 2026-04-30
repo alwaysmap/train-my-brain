@@ -5,4 +5,4 @@ argument-hint: "[optional topic hint]"
 
 Invoke the `tmb-create` skill with the user's arguments: `$ARGUMENTS`.
 
-If no topic is provided, the 7-step interview will discover it.
+If no topic is provided, the 8-step interview will discover it.

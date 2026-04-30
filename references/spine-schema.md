@@ -43,7 +43,7 @@ tradeoffs considered, or notes for the reviewer — NOT module content>
 
 ## Interview → spine mapping (R29)
 
-The 7-step interview's answers map into the spine:
+The 8-step interview's answers map into the spine:
 
 | Step | Question | Spine field |
 |---|---|---|

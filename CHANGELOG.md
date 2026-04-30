@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.4 — 2026-04-30
+
+### Added
+
+- **Step 8 of the interview: typography preset.** "Are you more into public signage or printed books?" The user picks once; the answer drives a `font_preset` (`signage` or `book`) persisted as `params.font_preset` in `hugo.yaml`.
+  - **Signage** — humanist sans (Inter → system-ui). Tight UI feel like wayfinding and modern docs.
+  - **Books** — classical serif (Source Serif 4 → Charter → Iowan Old Style → Georgia). Generous leading; reads like a long-form essay.
+  - Both presets ship with Inter for UI chrome and JetBrains Mono for code, loaded from Google Fonts via `<link rel="preconnect">` + `display=swap`.
+- **Dark mode** — `@media (prefers-color-scheme: dark)` block in `site.css` redefines every color token at adjusted lightness/saturation. Hue stays constant, so the palette identity carries from light to dark. The user's OS preference drives rendering automatically.
+- **High-contrast a11y mode** — `@media (prefers-contrast: more)` pushes text↔bg lightness gaps further (>= AAA's 7:1 contrast ratio) for low-vision users. Works on top of light or dark.
+- **Semantic color tokens** — palette is now organized as `--color-bg / --color-surface / --color-text / --color-muted / --color-border / --color-primary / --color-primary-soft / --color-primary-fade / --color-analogous / --color-triadic / --color-triadic-soft`. All HSLA, all derived from `--hue` via `calc()`. Light-mode contrast: text↔bg L gap of 84 → 16:1 (AAA). Dark: 80 → ~13:1 (AAA). Primary on either bg lands at AA (~5.4:1).
+
+### Changed
+
+- The 7-step interview is now an **8-step** interview. Every doc reference updated. The conversation-arc preamble at the top of `references/elicitation.md` says "8 short questions." `commands/tmb-create.md`, the `tmb-create` SKILL, the help skill, the designer/researcher agent contracts, and the spine schema all reflect the new count.
+- `scaffold-site.sh` accepts a new required `--font-preset signage|book` argument. `--layouts-only` mode preserves an existing curriculum's `font_preset` from `hugo.yaml` so refreshes don't reset it.
+
 ## 0.4.3 — 2026-04-30
 
 ### Breaking

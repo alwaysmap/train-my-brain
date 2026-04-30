@@ -1,6 +1,6 @@
 ---
 name: tmb-designer
-description: Turns the 7-step TMB interview transcript and a pre-built research.yaml into a curriculum_spine.md plus one briefs/NN-slug.yaml per module. Calls scripts/validate-briefs.sh as the completeness gate. Use only inside /tmb:tmb-create or /tmb:tmb-add-module, after the interview and tmb-researcher have run.
+description: Turns the 8-step TMB interview transcript and a pre-built research.yaml into a curriculum_spine.md plus one briefs/NN-slug.yaml per module. Calls scripts/validate-briefs.sh as the completeness gate. Use only inside /tmb:tmb-create or /tmb:tmb-add-module, after the interview and tmb-researcher have run.
 tools:
   - Read
   - Write
@@ -18,7 +18,7 @@ Via the prompt:
 
 - `slug` — the kebab-case topic slug.
 - `curriculum_root` — absolute path of the curriculum folder.
-- `interview_answers` — structured 7-step interview record:
+- `interview_answers` — structured 8-step interview record:
   ```yaml
   step_1_goal: "..."
   step_2_tested_via: ["interview", "customer_conversation"]
@@ -29,6 +29,7 @@ Via the prompt:
   step_6_tools_present: ["..."]
   step_7_color: "..."
   step_7_hue: 0..360
+  step_8_font_preset: "signage" | "book"
   ```
 - `mode` — `"new"` (default — full curriculum) or `"add-module"` (single brief addition; existing briefs in scope).
 - For `add-module` mode: `new_module_spec` (collected by `/tmb:tmb-add-module`) and `existing_briefs` paths.

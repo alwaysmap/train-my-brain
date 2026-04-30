@@ -20,7 +20,7 @@ Via the prompt:
 
 - `slug` — the kebab-case topic slug.
 - `curriculum_root` — absolute path to the curriculum folder (already created on disk).
-- `interview_answers` — the structured 7-step interview record (same shape passed to the designer).
+- `interview_answers` — the structured 8-step interview record (same shape passed to the designer).
 
 ## What you must read
 
@@ -71,7 +71,7 @@ bash scripts/validate-research.sh "<curriculum_root>"
 
 If the gate returns `ok: false`, you have not done enough research. Iterate: do more searches, fill the gaps, run the gate again. Do not write a research.yaml that fails its own gate; the designer will reject it and the user will see a worse error than if you'd just kept searching.
 
-A common failure: glossary < 8 entries. If that happens, your scope is probably too narrow — recheck the interview's depth/breadth signal and broaden to adjacent terms the learner will encounter.
+A common failure: glossary < 5 entries. If that happens, your scope is probably too narrow — recheck the interview's depth/breadth signal and broaden to adjacent terms the learner will encounter.
 
 ## Honest failure modes
 

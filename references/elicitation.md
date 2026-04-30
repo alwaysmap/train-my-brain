@@ -2,24 +2,26 @@
 
 ## How to run the interview
 
-The interview has exactly **7 steps**. Before asking step 1, tell the user the full shape of the conversation so they know what they signed up for:
+The interview has exactly **8 steps**. Before asking step 1, tell the user the full shape of the conversation so they know what they signed up for:
 
 > "Here's how the next ~10 minutes will go:
 >
->   **Phase 1 — Interview (7 short questions, ~5 minutes).** I'll ask one at a time and check my understanding after each before moving on.
+>   **Phase 1 — Interview (8 short questions, ~5 minutes).** I'll ask one at a time and check my understanding after each before moving on.
 >
 >   **Phase 2 — A few quick confirmations (~1 minute).** I'll confirm where to put the curriculum folder, then show you the proposed module list and wait for a 'go ahead' before building anything.
 >
 >   **Phase 3 — Autonomous work (~6–10 minutes, no input from you).** I research the topic, design the modules, scaffold the Hugo site, build each module in parallel, run a consistency reviewer, and start the local server.
 >
->   You can interrupt at any point. Ready to start?"
+>   You can interrupt at any point. Ready to start?
+>     1) Yes — start the interview
+>     2) Wait — I have a question first"
 
-Wait for the user to confirm before asking Step 1. Do not start the interview against a user who hasn't acknowledged this preamble — they'll lose the mental model of when the conversational part ends and the autonomous part begins.
+Wait for the user to pick 1 before asking Step 1. Do not start the interview against a user who hasn't acknowledged this preamble — they'll lose the mental model of when the conversational part ends and the autonomous part begins.
 
 Then for every step — **two exchanges, not one:**
 
 **Exchange A — the question:**
-1. Show the step number and total: **"Step N of 7"**
+1. Show the step number and total: **"Step N of 8"**
 2. Ask the question (use `ask_user_input` for multiple choice)
 3. Wait for the answer
 
@@ -44,7 +46,7 @@ this should feel like a good first meeting with a mentor, not a form.
 
 ---
 
-## Step 1 of 7: The real goal
+## Step 1 of 8: The real goal
 
 **Ask:**
 > "When you're done with this, how will you know it worked? What's the thing you'll be
@@ -87,7 +89,7 @@ this should feel like a good first meeting with a mentor, not a form.
 
 ---
 
-## Step 2 of 7: How they'll be tested
+## Step 2 of 8: How they'll be tested
 
 **Ask (use ask_user_input, multi-select):**
 > "How do you expect to actually be tested on this? Pick everything that applies."
@@ -126,7 +128,7 @@ Options:
 
 ---
 
-## Step 3 of 7: Starting point
+## Step 3 of 8: Starting point
 
 **Ask:**
 > "How would you honestly describe your current knowledge of [topic]? No judgment —
@@ -158,7 +160,7 @@ Options:
 
 ---
 
-## Step 4 of 7: Depth vs. breadth
+## Step 4 of 8: Depth vs. breadth
 
 **Ask (use ask_user_input, single-select):**
 > "For this goal, is it more important to know a lot of things at a surface level,
@@ -189,7 +191,7 @@ or `aware-of`. Calibrate the ratio based on this answer.
 
 ---
 
-## Step 5 of 7: Validation preference
+## Step 5 of 8: Validation preference
 
 **Ask (use ask_user_input, multi-select):**
 > "When you finish a module, how do you want to check that it actually stuck?"
@@ -211,7 +213,7 @@ Options:
 
 ---
 
-## Step 6 of 7: Time and environment
+## Step 6 of 8: Time and environment
 
 **Ask:**
 > "Two quick practical questions: How much time do you realistically have —
@@ -229,11 +231,10 @@ Options:
 
 ---
 
-## Step 7 of 7: A fun one
+## Step 7 of 8: A fun one
 
 **Ask:**
-> "Last one, and it's a bit different — what color makes you happy?
-> Just the first one that comes to mind."
+> "Almost done — what color makes you happy? Just the first one that comes to mind."
 
 Free text. Accept anything. Acknowledge warmly and move on — no deep reflection needed.
 
@@ -261,7 +262,35 @@ Store the hue number. Use it in `site/hugo.yaml` as `params.hue`.
 
 ---
 
-## After step 7: summary + folder location
+## Step 8 of 8: Typography
+
+**Ask (use ask_user_input, single-select):**
+> "Last one, promise. Are you more into public signage or printed books?
+> It picks the typography for your site."
+
+Options:
+- **Public signage** — clean humanist sans, like wayfinding, modern docs, app interfaces. Tight UI feel.
+- **Printed books** — classical serif with generous leading, like long-form essays and book chapters. Reading-room feel.
+
+**Reflect back — then STOP:**
+
+- Signage → "Crisp humanist sans for headings and body, monospace for code. Reads like a well-set technical doc." [STOP]
+- Books → "Source-style serif for body, sans for UI chrome. Reads like a long-form essay or chapter. Wider line-height, classical feel." [STOP]
+
+**Interpret:**
+
+| Answer | `font_preset` value | Body font (with system fallbacks) |
+|---|---|---|
+| Public signage | `signage` | Inter → system-ui → Helvetica Neue → sans-serif |
+| Printed books | `book`    | Source Serif 4 → Charter → Iowan Old Style → Georgia → serif |
+
+Store the chosen value as `font_preset`. Pass it to `scripts/scaffold-site.sh --font-preset <value>` and persist as `params.font_preset` in `site/hugo.yaml`.
+
+Both presets respect `prefers-color-scheme: dark` and `prefers-contrast: more` automatically — the user's OS setting drives the actual rendering.
+
+---
+
+## After step 8: summary + folder location
 
 **Summary:**
 
@@ -274,8 +303,11 @@ Store the hue number. Use it in `site/hugo.yaml` as `params.hue`.
 > **Validation:** [from Step 5]
 > **Timeline + tools:** [from Step 6]
 > **Site theme:** [color] → hue [N]°
+> **Typography:** [signage / books]
 >
-> Any corrections?"
+>   1) Looks right — proceed
+>   2) Suggest changes (which line is off?)
+>   3) Cancel"
 
 Wait for confirmation. Then ask folder location:
 
@@ -293,9 +325,9 @@ Wait for confirmation. Then ask folder location:
 
 **Don't accept vague goals.** Keep asking until something is specific enough to design for.
 
-**Don't over-interview.** 7 steps is the limit. If you can infer something, don't ask.
+**Don't over-interview.** 8 steps is the limit. If you can infer something, don't ask.
 
-**Don't design while interviewing.** Finish all 7 steps and the summary before
+**Don't design while interviewing.** Finish all 8 steps and the summary before
 proposing any module structure.
 
 **Don't ask the next question in the same message as the reflection.** This is the

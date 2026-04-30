@@ -19,7 +19,7 @@ Print this verbatim:
 Train My Brain (TMB) — commands
 
 /tmb:tmb-create
-    Full pipeline. Runs the 7-step interview, dispatches a one-shot topic
+    Full pipeline. Runs the 8-step interview, dispatches a one-shot topic
     researcher (writes research.yaml — canonical glossary, sourced reading
     list, concept map, contrasts, authorities), designs modules, scaffolds
     a local Hugo site, dispatches parallel module-builders (each reads

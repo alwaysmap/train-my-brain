@@ -4,16 +4,17 @@ description: >
   Use this skill when the user wants to build a learning curriculum, study plan,
   or "train their brain" on a topic. Triggers on "/tmb:tmb-create", "create a
   curriculum", "build a learning plan for X", "help me learn X for a job",
-  "I want to get credible in Y", "I need to learn X". Runs the 7-step interview,
+  "I want to get credible in Y", "I need to learn X". Runs the 8-step interview,
   dispatches a one-shot topic researcher, designs modules, scaffolds a Hugo site,
   bootstraps each module's filesystem with `hugo new`, dispatches parallel
   module-builders that share the research substrate, runs the deterministic
   reviewer, builds, and serves. Scaffolds into `<cwd>/<topic-slug>/`.
 user_summary: >
-  Build a hands-on learning curriculum for any topic. Asks 7 short questions,
+  Build a hands-on learning curriculum for any topic. Asks 8 short questions,
   researches the topic once, then produces a structured local Hugo site with
-  exercises and validation prompts.
-version: 0.4.0
+  exercises, validation prompts, dark-mode-aware theming, and your choice of
+  signage-style or book-style typography.
+version: 0.4.4
 argument-hint: "[optional topic hint — the interview will clarify]"
 allowed-tools: [Read, Write, Bash, Agent, Glob, Grep]
 ---
@@ -27,7 +28,7 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 | File | Loaded when |
 |------|-------------|
 | `SKILL.md` (this file) | Always — the workflow scaffold |
-| `references/elicitation.md` | Phase 1 — 7-step interview discipline |
+| `references/elicitation.md` | Phase 1 — 8-step interview discipline |
 | `skills/tmb-create/references/curriculum-state.md` | Phase 2 — only when `detect-curriculum.sh` returns non-fresh |
 | `references/research-schema.md` | Phase 3 — what `research.yaml` must contain |
 | `references/spine-schema.md` | Phase 4 — what the designer produces |
@@ -50,9 +51,9 @@ The script tells the user what's missing and offers (macOS+brew) or prints (Linu
 
 ### Phase 1: Interview
 
-**Read `references/elicitation.md`** before starting. Run the 7 steps with the two-exchange discipline (ask → wait → reflect → STOP → wait for confirmation → ask next). Do not skip the reflection pauses.
+**Read `references/elicitation.md`** before starting. Run the 8 steps with the two-exchange discipline (ask → wait → reflect → STOP → wait for confirmation → ask next). Do not skip the reflection pauses.
 
-After Step 7, summarize back ("Here's what I'm building: ..."). Wait for confirmation before Phase 2.
+After Step 8, summarize back ("Here's what I'm building: ..."). Wait for confirmation before Phase 2.
 
 ### Phase 2: Target directory
 
@@ -88,8 +89,11 @@ bash scripts/scaffold-site.sh \
   --title "<from interview>" \
   --description "<one-sentence>" \
   --author "<git config user.name or asked>" \
-  --hue <interview_answers.step_7_hue>
+  --hue <interview_answers.step_7_hue> \
+  --font-preset <interview_answers.step_8_font_preset>
 ```
+
+`--font-preset` is `signage` or `book` from Step 8 of the interview. The scaffold writes both as `params.hue` and `params.font_preset` in `hugo.yaml`; the Hugo templates load the matching Google Fonts and apply the right CSS variables. Dark mode + WCAG-AA contrast handling are automatic via `prefers-color-scheme` and `prefers-contrast` media queries (the user's OS setting drives rendering).
 
 Stop on failure. Don't dispatch builders against a broken scaffold.
 
@@ -162,7 +166,7 @@ For agent dispatch (Phases 3, 4, 7, 8): also include an estimated duration if yo
 
 ### Confirmations are multiple-choice, not yes/no
 
-Every confirmation gate outside the 7-step interview (target-directory confirmation, design approval, resume offer, dep install offer, open-question resolution from the researcher) is presented as a **numbered multiple-choice prompt**, not as "Is that ok?" with free-text yes/no. The user types a single digit; you act on it.
+Every confirmation gate outside the 8-step interview (target-directory confirmation, design approval, resume offer, dep install offer, open-question resolution from the researcher) is presented as a **numbered multiple-choice prompt**, not as "Is that ok?" with free-text yes/no. The user types a single digit; you act on it.
 
 Standard format:
 
@@ -205,7 +209,7 @@ Rules:
 - Wait for a digit. If the user types something else, restate the options.
 - "Suggest changes" means *the user types what to change in plain prose* — you treat it as an open turn, then return to the same gate after applying the change.
 
-The 7-step interview itself uses its own elicitation pattern (`references/elicitation.md`) — that's a different pattern with reflection pauses. Multiple-choice applies only to confirmation gates between phases.
+The 8-step interview itself uses its own elicitation pattern (`references/elicitation.md`) — that's a different pattern with reflection pauses. Multiple-choice applies only to confirmation gates between phases.
 
 Examples:
 

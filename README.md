@@ -58,7 +58,7 @@ Want to publish it online? See [Publishing online (GitHub Pages)](#publishing-on
 
 | Command | What it does |
 |---|---|
-| `/tmb:tmb-create` | Full pipeline: 7-step interview → topic research (`research.yaml`) → design phase → Hugo scaffold → parallel module builders → consistency reviewer → build → serve. Scaffolds into `<cwd>/<slug>/`. |
+| `/tmb:tmb-create` | Full pipeline: 8-step interview → topic research (`research.yaml`) → design phase → Hugo scaffold → parallel module builders → consistency reviewer → build → serve. Scaffolds into `<cwd>/<slug>/`. |
 | `/tmb:tmb-review` | Re-runs the consistency reviewer against an existing curriculum. Calls deterministic scripts for adjacency, frontmatter, URL reachability, AI-prose regex, and glossary merge. |
 | `/tmb:tmb-add-module` | Adds one module to an existing curriculum. Supports append and insert-at-position-K (shifts later modules' weights mechanically). |
 | `/tmb:tmb-rebuild-site` | Refreshes Hugo layouts / CSS / config without touching `content/` or `modules/`, then rebuilds `site/public/`. |
