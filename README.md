@@ -86,6 +86,21 @@ bash scripts/check-deps.sh
 - **Linux** — first-class. snap or apt+upstream binaries.
 - **Windows** — supported via WSL (use the Linux instructions inside your WSL distro). Native Windows is untested; PowerShell counterparts ship for `serve.ps1` / `build.ps1` / `stop.ps1` but the determinism scripts assume bash.
 
+## Publishing online (GitHub Pages)
+
+Every TMB curriculum scaffolds with a working `.github/workflows/deploy.yml`. Push the curriculum folder to a GitHub repo, enable Pages once, and every subsequent push to `main` rebuilds and redeploys automatically.
+
+Quick version (with the `gh` CLI installed):
+
+```sh
+cd <curriculum-slug>
+git init && git add . && git commit -m "Initial curriculum"
+gh repo create <your-username>/<curriculum-slug> --public --source=. --push
+# then in repo Settings → Pages → Source = "GitHub Actions"
+```
+
+Full step-by-step including the manual non-`gh` path, custom domains, and troubleshooting: see [`references/github-pages.md`](references/github-pages.md).
+
 ## About
 
 Built by [Dylan Thomas](https://bitsby.me) · Part of the [alwaysmap](https://github.com/alwaysmap) toolkit

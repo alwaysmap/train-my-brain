@@ -43,7 +43,7 @@ Do not hang. 15 seconds is the absolute ceiling on the probe. Match the actual s
 Print this block, substituting the runtime values:
 
 ```
-Your curriculum is ready.
+[11 of 11] Your curriculum is ready.
 
 🌐 Site:   http://localhost:1313
 📁 Folder: file://<target>/
@@ -60,6 +60,14 @@ Research substrate: <target>/research.yaml
 Review: <target>/review.md
   - Mechanical fixes applied: <N>
   - Substantive flags waiting: <K>
+
+Want to publish this online?
+  See references/github-pages.md for the full push-and-publish flow.
+  Quick version (with the gh CLI installed):
+    cd <target>
+    git init && git add . && git commit -m "Initial curriculum"
+    gh repo create <your-username>/<slug> --public --source=. --push
+    # then enable Pages: repo Settings → Pages → Source = "GitHub Actions"
 ```
 
 If `K > 0`, append:

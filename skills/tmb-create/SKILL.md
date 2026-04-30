@@ -36,6 +36,7 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 | `references/reviewer-policy.md` | Phase 8 — what the reviewer enforces |
 | `skills/tmb-create/references/delivery.md` | Phase 10 + 11 — tmux serve flow + delivery block |
 | `skills/tmb-create/references/quality-gates.md` | Before declaring delivery complete — 12-item green-check list |
+| `references/github-pages.md` | Phase 11 — only when the user asks how to publish online |
 
 ## Workflow
 
@@ -131,7 +132,38 @@ Surface errors verbatim.
 
 ## Standing rules
 
-- Announce each phase in one short line so users see progress.
+### Progress announcements
+
+Every phase boundary the user can't otherwise see — every script call, every agent dispatch — gets a one-line announcement in this format:
+
+```
+[<N> of 11] <short verb-led description>...
+```
+
+Examples:
+
+- `[3 of 11] Researching the topic — this takes 1–2 minutes.`
+- `[6 of 11] Bootstrapping module filesystems with hugo new...`
+- `[7 of 11] Dispatching 6 module-builders in parallel — this takes 3–5 minutes.`
+- `[8 of 11] Running the consistency reviewer...`
+- `[9 of 11] Building the static site...`
+- `[10 of 11] Starting the dev server.`
+
+Phases 0–2 don't need numbered announcements — the user is actively in conversation. The phase counter is for the autonomous block (Phase 3 onward) so the user has a clear "we're at step X of 11" mental model and can leave the laptop without losing the thread.
+
+For agent dispatch (Phases 3, 4, 7, 8): also include an estimated duration if you have one.
+
+### Confirmations vs new questions
+
+When you need user input *outside* the 7-step interview (target directory confirmation, design approval, resume offer, open-question resolution from the researcher), prefix the message with **"Quick confirmation:"** so the user can distinguish a confirmation gate from a new substantive question. Otherwise users start treating every prompt like another interview question and the conversational arc becomes muddy.
+
+Examples:
+
+- `Quick confirmation: I'll create the curriculum at <target>. Use that, or pick a different parent? [Enter to accept]`
+- `Quick confirmation: Designed 6 modules: <titles>. Running example: <name>. Continue to scaffold? [Y/n]`
+
+### Other rules
+
 - Never skip a phase even if the user says "just do it" — the interview discipline and research substrate are what make the output good.
 - Propagate agent and script errors verbatim. Do not paraphrase them into optimism.
 - Do not invent content. Module content comes from agents; scaffold from `scaffold-site.sh`; URLs and definitions from `research.yaml`.

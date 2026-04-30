@@ -2,11 +2,19 @@
 
 ## How to run the interview
 
-The interview has exactly **7 steps**. Before asking step 1, tell the user this:
+The interview has exactly **7 steps**. Before asking step 1, tell the user the full shape of the conversation so they know what they signed up for:
 
-> "Before I build anything, I want to make sure I understand what you're actually
-> trying to do. I'll ask you 7 short questions — it'll take about 5 minutes.
-> I'll check my understanding after each one before moving on."
+> "Here's how the next ~10 minutes will go:
+>
+>   **Phase 1 — Interview (7 short questions, ~5 minutes).** I'll ask one at a time and check my understanding after each before moving on.
+>
+>   **Phase 2 — A few quick confirmations (~1 minute).** I'll confirm where to put the curriculum folder, then show you the proposed module list and wait for a 'go ahead' before building anything.
+>
+>   **Phase 3 — Autonomous work (~6–10 minutes, no input from you).** I research the topic, design the modules, scaffold the Hugo site, build each module in parallel, run a consistency reviewer, and start the local server.
+>
+>   You can interrupt at any point. Ready to start?"
+
+Wait for the user to confirm before asking Step 1. Do not start the interview against a user who hasn't acknowledged this preamble — they'll lose the mental model of when the conversational part ends and the autonomous part begins.
 
 Then for every step — **two exchanges, not one:**
 

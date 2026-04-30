@@ -60,6 +60,16 @@ Requirements
   runs this same preflight as Phase 0, so you can also just run /tmb:create
   and let it tell you what's missing.
 
+Publishing online (GitHub Pages)
+  Every curriculum scaffolds with a ready-to-go .github/workflows/deploy.yml.
+  Quick path (with gh CLI):
+      cd <curriculum-slug>
+      git init && git add . && git commit -m "Initial curriculum"
+      gh repo create <username>/<slug> --public --source=. --push
+      # then: repo Settings → Pages → Source = "GitHub Actions"
+  Full guide (manual flow, custom domains, troubleshooting):
+      references/github-pages.md
+
 More
   CHANGELOG.md for v0.4 release notes
   README.md for the full per-platform install matrix
