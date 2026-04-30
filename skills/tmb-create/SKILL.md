@@ -28,12 +28,14 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 |------|-------------|
 | `SKILL.md` (this file) | Always — the workflow scaffold |
 | `references/elicitation.md` | Phase 1 — 7-step interview discipline |
+| `skills/tmb-create/references/curriculum-state.md` | Phase 2 — only when `detect-curriculum.sh` returns non-fresh |
 | `references/research-schema.md` | Phase 3 — what `research.yaml` must contain |
 | `references/spine-schema.md` | Phase 4 — what the designer produces |
 | `references/brief-schema.md` | Phase 4 — per-module brief contract |
 | `references/curriculum-design.md` | Phase 4 + Phase 7 — pedagogy rules |
 | `references/reviewer-policy.md` | Phase 8 — what the reviewer enforces |
 | `skills/tmb-create/references/delivery.md` | Phase 10 + 11 — tmux serve flow + delivery block |
+| `skills/tmb-create/references/quality-gates.md` | Before declaring delivery complete — 12-item green-check list |
 
 ## Workflow
 
@@ -43,13 +45,7 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 bash scripts/check-deps.sh
 ```
 
-The script verifies hugo (extended), yq, jq, and curl are present. If anything is missing:
-
-- **macOS + brew**: the script offers `brew install <missing>` interactively. The user types `y` to install.
-- **Linux**: the script prints copy-paste commands (snap / apt / direct download — TMB does not auto-elevate `sudo`).
-- **Anything else**: upstream URLs are printed.
-
-If the script exits non-zero, propagate its output verbatim and stop. The user must complete the install (or accept the interactive offer) before you can proceed. Do not attempt to install dependencies yourself outside the script's flow — `check-deps.sh` already handles every platform we support.
+The script tells the user what's missing and offers (macOS+brew) or prints (Linux) install commands. If it exits non-zero, propagate its output verbatim and stop. Do not freelance dep installs.
 
 ### Phase 1: Interview
 
@@ -65,13 +61,9 @@ Derive a kebab-case slug from the Step 1 goal + topic. Compute `target = <cwd>/<
 bash scripts/detect-curriculum.sh "<target>"
 ```
 
-Branch on `state`:
+**If `state == "fresh"`:** `mkdir -p "<target>"` and continue.
 
-- `fresh` — `mkdir -p "<target>"` and continue.
-- `v0.4-partial` — offer resume; on yes, skip to Phase 6 and only dispatch new-module + builders for `missing_pages`.
-- `v0.3-*` — refuse; v0.4 introduces research.yaml with no auto-upgrade.
-- `v0.2` — refuse with the v0.2 message.
-- `non-tmb` — refuse with "directory exists and is not empty."
+**Otherwise**, read `skills/tmb-create/references/curriculum-state.md` for the per-state branch logic (`v0.4-partial` resume offer, `v0.3`/`v0.2` refusal messages, `non-tmb` refusal). The reference has the user-facing text verbatim.
 
 ### Phase 3: Topic research
 
@@ -146,15 +138,4 @@ Surface errors verbatim.
 
 ## Quality gates
 
-- [ ] `check-deps.sh` passed (Phase 0)
-- [ ] All 7 interview steps confirmed
-- [ ] Target was `fresh` or `v0.4-partial`
-- [ ] `research.yaml` written, `validate-research.sh` passed
-- [ ] Spine + briefs written, `validate-briefs.sh` passed
-- [ ] Hugo site scaffolded
-- [ ] `new-module.sh` succeeded for every brief
-- [ ] Every builder returned (success or flagged failure)
-- [ ] `review.md` written
-- [ ] `./build.sh` succeeded
-- [ ] Server running OR user has the exact command
-- [ ] Delivery block printed with accurate state
+Before declaring delivery complete, work through `skills/tmb-create/references/quality-gates.md` — a 12-item checklist covering preflight, interview, research, design, scaffold, bootstrap, builders, reviewer, build, and serve.

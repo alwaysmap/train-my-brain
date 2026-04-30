@@ -26,68 +26,57 @@ Add one module to an existing TMB v0.4 curriculum.
 | File | Loaded when |
 |------|-------------|
 | `SKILL.md` (this file) | Always |
-| `references/brief-schema.md` | Phase 3 — designer is producing a new brief |
-| `references/curriculum-design.md` | Phase 1 — pushing back on vague answers |
-| `references/research-schema.md` | Phase 1 — cross-checking concepts against research.yaml |
+| `references/spec-elicitation.md` | Phase 1 — the 4-question script + pushback rules + concept cross-check |
+| `references/position-handling.md` | Phase 2 — append vs insert-at-K mechanics |
+| `references/brief-schema.md` (repo-level) | Phase 3 — designer is producing a new brief |
 
-## Phase 0: Preflight
+## Workflow
+
+### Phase 0: Preflight
 
 ```bash
 bash scripts/check-deps.sh
 bash scripts/detect-curriculum.sh "$(pwd)"
 ```
 
-Refuse unless the JSON `state` is `v0.4-complete`. (Partial means an unfinished `/tmb:create` — direct the user to resume that first.)
+Refuse unless `state` is `v0.4-complete`. (Partial means an unfinished `/tmb:create` — direct the user to resume that first.)
 
-Also confirm `research.yaml` exists. If missing, refuse: *"This curriculum was created before v0.4 (no research.yaml). Add-module needs the research substrate. Re-run /tmb:create to migrate."*
+Also confirm `research.yaml` exists. If missing: *"This curriculum was created before v0.4 (no research.yaml). Add-module needs the research substrate. Re-run /tmb:create to migrate."*
 
-## Phase 1: Collect the new module's spec
+### Phase 1: Collect the new module's spec
 
-Ask the user one question at a time:
+**Read `references/spec-elicitation.md`.** It has the 4-question script, the pushback rules for vague answers, and the cross-check against `research.yaml.concept_map`.
 
-1. *"What's the driving question this module answers?"* (non-rhetorical, not "What is X?")
-2. *"What are 3–5 concepts this module covers?"* (plain prose, not jargon)
-3. *"What's the contrast target — the alternative a practitioner would actually consider instead?"*
-4. *"What position? Append, or a weight N to insert at?"*
+Output: a structured `new_module_spec` you'll pass to the designer in Phase 3.
 
-Push back once on vague answers. Don't proceed with placeholder fields.
+### Phase 2: Position handling
 
-Cross-check the user's concepts against `research.yaml.concept_map`. If a concept isn't in research.yaml, warn: *"<concept> isn't in research.yaml. The designer will flag this as a research gap rather than guessing. Re-run /tmb:create with broader research, or pick a different concept."*
+**Read `references/position-handling.md`.** It has the append vs insert-at-K branch logic, the weight-shift mechanics, and the user-facing message templates.
 
-## Phase 2: Position handling
+Output: a position decision (`position_mode`, `new_weight`, `shift_set`).
 
-Read `briefs/*.yaml` to determine current max weight and existing weights.
-
-**Append (new_weight == max + 1):** designer writes only the new brief.
-
-**Insert-at-K (new_weight ≤ current max):** the designer must shift every existing brief with `weight ≥ K` by +1, AND rewrite the adjacency strings on shifted briefs so the chain stays coherent. The reviewer's `check-adjacency.sh` will catch any drift.
-
-Tell the user explicitly when inserting: *"Inserting at weight K shifts modules <K..max>. Their `prior_ends_with` / `next_expects` strings may need editing. The reviewer will flag any chain break."*
-
-## Phase 3: Designer (add-module mode)
+### Phase 3: Designer (add-module mode)
 
 ```
 Agent(
   subagent_type: "tmb-designer",
-  prompt: <JSON with mode="add-module", slug, curriculum_root=cwd, new_module_spec, existing_briefs>
+  prompt: <JSON with mode="add-module", slug, curriculum_root=cwd, new_module_spec, position_mode, shift_set, existing_briefs>
 )
 ```
 
-The designer reads the existing spine and `research.yaml`, writes the new brief (and rewrites shifted briefs if inserting), then runs `bash scripts/validate-briefs.sh "$(pwd)"`.
+The designer reads the existing spine + `research.yaml`, writes the new brief (and rewrites shifted briefs if inserting), then runs `bash scripts/validate-briefs.sh "$(pwd)"`.
 
-If the gate fails, surface the error and stop. Do not bootstrap or dispatch the builder.
+On gate failure: surface the error and stop. Do not bootstrap or dispatch the builder.
 
-## Phase 4: Bootstrap module files
+### Phase 4: Bootstrap module files
 
 ```bash
 bash scripts/new-module.sh "$(pwd)" "<NN-slug>"
 ```
 
-This runs `hugo new modules/<slug>/index.md` (using the archetype), patches the frontmatter from the new brief, creates `modules/<slug>/exercises/`, and seeds `VALIDATION.md` and `new_terms.yaml`. Pure shell — no LLM in this loop.
+`hugo new` + frontmatter patch + mkdir exercises/ + seed VALIDATION.md and new_terms.yaml. Pure shell, no LLM. On failure (e.g., module already exists), surface the error and stop.
 
-If it fails (e.g., module already exists), surface the error and stop.
-
-## Phase 5: Dispatch a single module-builder
+### Phase 5: Dispatch a single module-builder
 
 ```
 Agent(
@@ -96,11 +85,11 @@ Agent(
 )
 ```
 
-The builder fills in the body of `index.md`, the exercise files, the body of `VALIDATION.md`, and `new_terms.yaml` entries. It does NOT touch frontmatter (already deterministic).
+The builder fills in the body of `index.md`, the exercise files, the body of `VALIDATION.md`, and `new_terms.yaml`. It does NOT touch frontmatter.
 
-If the builder fails, leave the brief in place and let the reviewer flag the build failure. The user can retry.
+On builder failure, leave the brief in place. The reviewer will flag the build failure; the user can retry.
 
-## Phase 6: Scoped reviewer
+### Phase 6: Scoped reviewer
 
 ```
 Agent(
@@ -109,15 +98,15 @@ Agent(
 )
 ```
 
-For append: `scope_modules = [N-1, N]`. For insert-at-K: every shifted module plus the new one.
+`scope_modules` for append: `[N-1, N]`. For insert-at-K: every shifted module plus the new one.
 
-## Phase 7: Rebuild
+### Phase 7: Rebuild
 
 ```bash
 cd "$(pwd)" && ./build.sh
 ```
 
-Don't auto-start the server — the user may already have one. If they want the change live: `./stop.sh && ./serve.sh`.
+Don't auto-start the server. If they want the change live: `./stop.sh && ./serve.sh`.
 
 ## Delivery
 
