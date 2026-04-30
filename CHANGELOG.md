@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.4.3 — 2026-04-30
+
+### Breaking
+
+- **Each module is now a Hugo branch bundle, not a leaf page.** v0.4.2 wrote concept content to `site/content/modules/<slug>/index.md` and exercises + validation to `modules/<slug>/exercises/` and `modules/<slug>/VALIDATION.md` (outside Hugo, invisible on the site). v0.4.3 publishes everything as Hugo content:
+  - `site/content/modules/<slug>/_index.md` — concept page
+  - `site/content/modules/<slug>/validation.md` — `/modules/<slug>/validation/`
+  - `site/content/modules/<slug>/exercises/_index.md` — `/modules/<slug>/exercises/`
+  - `site/content/modules/<slug>/exercises/<name>.md` — `/modules/<slug>/exercises/<name>/`
+  - `modules/<slug>/new_terms.yaml` — kept (data file, not user-facing)
+
+  v0.4.2 curricula need to be re-generated (`/tmb:tmb-create` from a fresh directory). The existing exercise + validation files under `modules/<slug>/` are not auto-migrated.
+
+### Added
+
+- **Glossary auto-linker** (`scripts/link-glossary.sh`) — scans every module page, wraps the first occurrence of every known glossary term in a Hugo `{{< gloss "..." >}}` shortcode that links to the glossary anchor. Knows about `research.yaml.glossary` (with aliases), `curriculum_spine.glossary_seed`, and per-module `new_terms.yaml`. Idempotent. Runs in the reviewer phase as a mechanical fix. Solves "RAG is mentioned in a table heading but never linked to a definition."
+- **`gloss` Hugo shortcode** — `{{< gloss "Term" "display text" >}}` renders a glossary link. Module-builders can use it directly; the auto-linker fills in any first-mention they missed.
+- **Modules sidebar nav** — every page shows a sticky-positioned `<aside>` listing every module in weight order, with the current module highlighted and its sub-resources (validation, exercises) expanded. No more "next, next, next" — full curriculum navigation is always visible.
+- **Practice section on each module page** — the concept page now ends with a "Practice" block linking to its validation and exercises with explicit calls to action ("try the scenario aloud, then answer in writing").
+- **Multiple-choice confirmation gates** — every gate in `/tmb:tmb-create` (target dir, design approval, dep install, resume offer, research open-questions) presents numbered options like `1) Proceed / 2) Suggest changes / 3) Cancel` instead of "Is that ok?". One-keystroke confirmations, no more typing "yes" five times per setup.
+
+### Fixed
+
+- **Module pages no longer show "planned" status pill.** The status field was a v0.2 artifact that never went anywhere; layouts now ignore it. (Status field stays in frontmatter as `planned` — just hidden in templates.)
+- **`(source: research.yaml)` removed from glossary entries.** `merge-glossary.sh` now writes clean `## Term` + definition entries with no provenance line.
+- **Prev/next module navigation goes the right direction.** v0.4.2 used Hugo's `.PrevInSection` / `.NextInSection` which default to date-descending. v0.4.3 sorts by `weight` ascending so module N's "next" is module N+1.
+- **Hugo deprecation warnings cleared.** Updated to `defaultContentLanguage` and removed `paginate` (now `pagination.pagerSize` in Hugo 0.158+; we drop the explicit setting since the default is fine).
+- **Module-builder agent contract strengthened.** Hard rules now state every module produces at least one exercise file with at least two `[TODO:]` markers, plus a validation page with scenario + good-answer + try-it-aloud. The reviewer flags any module missing these as `build_failure`.
+
 ## 0.4.2 — 2026-04-30
 
 ### Fixed

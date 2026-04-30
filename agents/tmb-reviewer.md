@@ -57,9 +57,9 @@ You do **not** re-read every brief, every page, every new_terms.yaml. The script
 
 ## Operational phases
 
-### Phase A: Run the deterministic checks
+### Phase A: Run the deterministic checks and mutations
 
-Run these in parallel where possible (they're read-only). Capture each script's JSON to a variable.
+Read-only checks first; capture each script's JSON to a variable.
 
 ```bash
 ADJACENCY=$(bash scripts/check-adjacency.sh "<curriculum_root>")
@@ -69,17 +69,26 @@ AI_PROSE=$(bash scripts/check-ai-prose.sh "<curriculum_root>")
 GLOSSARY=$(bash scripts/merge-glossary.sh "<curriculum_root>")
 ```
 
-Each script returns `{ok: bool, ...details}`. Treat any `ok: false` as a candidate for a substantive flag (URL reachability is the exception — non-2xx is almost always a real problem).
+Each returns `{ok: bool, ...details}`. Treat any `ok: false` as a candidate for a substantive flag (URL reachability is the exception — non-2xx is a real problem).
+
+Then run the mutations:
+
+```bash
+LINKED=$(bash scripts/link-glossary.sh "<curriculum_root>")
+```
+
+`link-glossary.sh` writes `{{< gloss "..." >}}` shortcodes into module pages, wrapping the first occurrence of every known glossary term. Count `LINKED.links_added | length` and report it as a mechanical-fix entry. The script is idempotent — running it twice on the same curriculum is a no-op.
 
 ### Phase B: Mechanical fixes
 
 Fixes that are obviously safe and cannot have user-meaningful tradeoffs. In `full` and `scoped` modes, apply without asking. In `apply-approved`, skip — the original run already applied them.
 
-1. **Frontmatter sync.** For every entry in `FRONTMATTER.mismatches`, edit the module's `index.md` so its frontmatter matches the brief. The brief is authoritative.
-2. **Hugo archetype defaults.** For any module missing `status` / `date` / `draft`, fill with `planned` / today / `false`.
+1. **Frontmatter sync.** For every entry in `FRONTMATTER.mismatches`, edit the module's `_index.md` so its frontmatter matches the brief. The brief is authoritative.
+2. **Hugo archetype defaults.** For any page missing `date` / `draft`, fill with today / `false`.
 3. **Weight collisions.** Group modules by weight; the lower-position-in-briefs-dir keeps it; subsequent ones shift to the next free integer. Update brief AND frontmatter.
 4. **Glossary merge.** Already done by `merge-glossary.sh`; confirm it wrote `glossary.md` and capture the term count + conflict list.
-5. **Link format normalization.** Rewrite absolute `/site/...` links as site-relative `../NN-slug/`; rewrite bare `<URL>` angle-brackets as `[URL](URL)`.
+5. **Glossary auto-linking.** Already done by `link-glossary.sh`; report `links_added` count.
+6. **Link format normalization.** Rewrite absolute `/site/...` links as site-relative `../NN-slug/`; rewrite bare `<URL>` angle-brackets as `[URL](URL)`.
 
 Track each fix in a list for the `review.md` summary.
 

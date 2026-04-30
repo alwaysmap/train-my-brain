@@ -102,7 +102,14 @@ for brief in "<target>/briefs"/*.yaml; do
 done
 ```
 
-`new-module.sh` runs `hugo new` (using the archetype) and patches frontmatter from the brief. After this, every module's filesystem is ready and frontmatter is correct — builders only deal with bodies. In resume mode, the script refuses to clobber existing modules; skip those.
+`new-module.sh` creates each module as a Hugo branch bundle:
+
+- `site/content/modules/<slug>/_index.md` (concept page, frontmatter populated from brief)
+- `site/content/modules/<slug>/validation.md` (with scenario inlined)
+- `site/content/modules/<slug>/exercises/_index.md` (exercises section)
+- `modules/<slug>/new_terms.yaml` (data file, not Hugo content)
+
+Builders only fill in body content. The script refuses to clobber existing modules in resume mode.
 
 ### Phase 7: Parallel module builders
 
@@ -112,7 +119,7 @@ Dispatch one `tmb-module-builder` per bootstrapped slug, in parallel (cap 10 per
 
 ### Phase 8: Reviewer
 
-Dispatch `tmb-reviewer` with `mode="full"`. The reviewer runs every determinism script (adjacency, frontmatter, URL reachability, AI-prose, glossary merge), applies mechanical fixes, and writes `review.md`. If it crashes mid-pass it leaves a partial `review.md` with a footer — fine, continue.
+Dispatch `tmb-reviewer` with `mode="full"`. The reviewer runs every determinism script (adjacency, frontmatter, URL reachability, AI-prose, glossary merge, **glossary auto-link**), applies mechanical fixes, and writes `review.md`. The auto-linker injects `{{< gloss "..." >}}` shortcodes so first mentions of glossary terms become clickable. If the reviewer crashes mid-pass it leaves a partial `review.md` with a footer — fine, continue.
 
 ### Phase 9: Build
 
@@ -153,9 +160,52 @@ Phases 0–2 don't need numbered announcements — the user is actively in conve
 
 For agent dispatch (Phases 3, 4, 7, 8): also include an estimated duration if you have one.
 
-### Confirmations vs new questions
+### Confirmations are multiple-choice, not yes/no
 
-When you need user input *outside* the 7-step interview (target directory confirmation, design approval, resume offer, open-question resolution from the researcher), prefix the message with **"Quick confirmation:"** so the user can distinguish a confirmation gate from a new substantive question. Otherwise users start treating every prompt like another interview question and the conversational arc becomes muddy.
+Every confirmation gate outside the 7-step interview (target-directory confirmation, design approval, resume offer, dep install offer, open-question resolution from the researcher) is presented as a **numbered multiple-choice prompt**, not as "Is that ok?" with free-text yes/no. The user types a single digit; you act on it.
+
+Standard format:
+
+```
+Quick confirmation: <state of the world in one line>.
+  1) Proceed
+  2) Suggest changes
+  3) Cancel
+```
+
+Pick the options that fit the gate. Examples:
+
+```
+Quick confirmation: I'll create the curriculum at <target>.
+  1) Proceed
+  2) Use a different parent directory
+  3) Cancel
+```
+
+```
+Quick confirmation: Designed 6 modules — Lifecycle, Data, Post-training, Evals,
+Safety, Productization. Running example: Claude Legal Advisor.
+  1) Proceed to scaffold
+  2) Suggest changes (which module to revise, drop, or add?)
+  3) Cancel
+```
+
+```
+Quick confirmation: Found an in-progress v0.4 curriculum at <target> with 3
+modules missing.
+  1) Resume — re-run only the missing builders
+  2) Start fresh — abort and rename the existing folder
+```
+
+Rules:
+
+- Always lead with `Quick confirmation:` so the user knows it's a gate, not a substantive question.
+- One numbered option per line.
+- 2–4 options. Two is fine when the choice is binary (proceed vs cancel). Three when there's a "modify" path.
+- Wait for a digit. If the user types something else, restate the options.
+- "Suggest changes" means *the user types what to change in plain prose* — you treat it as an open turn, then return to the same gate after applying the change.
+
+The 7-step interview itself uses its own elicitation pattern (`references/elicitation.md`) — that's a different pattern with reflection pauses. Multiple-choice applies only to confirmation gates between phases.
 
 Examples:
 

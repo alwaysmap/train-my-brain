@@ -1,29 +1,36 @@
 #!/usr/bin/env bash
 # new-module.sh — Bootstrap a single module's filesystem layout from its brief.
 #
-# What it does (deterministically — no LLM in this loop):
-#   1. cd into <curriculum_root>/site and run `hugo new modules/<slug>/index.md`,
-#      which uses archetypes/modules.md to seed the frontmatter.
-#   2. Patch every brief-sourced frontmatter field with values from briefs/<slug>.yaml.
-#   3. Create modules/<slug>/exercises/ (empty — agent fills in exercise files).
-#   4. Seed modules/<slug>/VALIDATION.md from a template, with brief.validation_scenario
-#      already inlined.
-#   5. Seed modules/<slug>/new_terms.yaml as `[]` so the agent can append.
+# v0.4.3 content model: each module is a Hugo branch bundle so its concept,
+# validation, and exercises all get real URLs.
 #
-# After this script returns, the module-builder agent only writes BODIES, never
-# frontmatter. That eliminates an entire class of frontmatter-drift bugs.
+#   site/content/modules/<slug>/_index.md           # concept page
+#   site/content/modules/<slug>/validation.md       # validation page
+#   site/content/modules/<slug>/exercises/_index.md # exercises section
+#   modules/<slug>/new_terms.yaml                   # data file (not Hugo content)
+#
+# What this script does (deterministically — no LLM in this loop):
+#   1. cd into <curriculum_root>/site and run `hugo new modules/<slug>/_index.md`
+#      using archetypes/modules.md to seed frontmatter.
+#   2. Patch every brief-sourced frontmatter field with values from briefs/<slug>.yaml.
+#   3. `hugo new` for validation.md and exercises/_index.md, also frontmatter-patched.
+#   4. Seed validation.md body with brief.validation_scenario and contrast prompt.
+#   5. Seed modules/<slug>/new_terms.yaml as `[]` (data file the reviewer reads).
+#
+# After this returns, the module-builder agent only writes BODY content into
+# the existing files (and creates individual exercise pages in exercises/).
+# It must NOT modify frontmatter — the reviewer's check-frontmatter.sh enforces.
 #
 # Usage: bash scripts/new-module.sh <curriculum_root> <slug>
 #
-# Output: JSON to stdout with the four paths the agent should fill in:
+# Output: JSON with the paths the agent should fill in:
 #   { ok: bool,
-#     index_md: "...",
-#     exercises_dir: "...",
-#     validation_md: "...",
-#     new_terms_yaml: "..." }
+#     concept_md:    "<root>/site/content/modules/<slug>/_index.md",
+#     validation_md: "<root>/site/content/modules/<slug>/validation.md",
+#     exercises_dir: "<root>/site/content/modules/<slug>/exercises/",
+#     new_terms_yaml:"<root>/modules/<slug>/new_terms.yaml" }
 #
-# Exit 0 on success; 1 if any file already exists (idempotent caller can detect);
-# 2 on usage / setup error.
+# Exit 0 on success; 1 if any file already exists; 2 on usage / setup error.
 
 set -euo pipefail
 
@@ -37,40 +44,53 @@ command -v jq   >/dev/null || { echo '{"ok":false,"error":"jq not found"}'   >&2
 
 BRIEF="$ROOT/briefs/$SLUG.yaml"
 SITE="$ROOT/site"
-PAGE="$SITE/content/modules/$SLUG/index.md"
-MOD_DIR="$ROOT/modules/$SLUG"
-EX_DIR="$MOD_DIR/exercises"
-VAL="$MOD_DIR/VALIDATION.md"
-NT="$MOD_DIR/new_terms.yaml"
+MOD_BUNDLE="$SITE/content/modules/$SLUG"
+CONCEPT="$MOD_BUNDLE/_index.md"
+VALIDATION="$MOD_BUNDLE/validation.md"
+EX_INDEX="$MOD_BUNDLE/exercises/_index.md"
+EX_DIR="$MOD_BUNDLE/exercises"
+NT_DIR="$ROOT/modules/$SLUG"
+NT="$NT_DIR/new_terms.yaml"
 
 [ -f "$BRIEF" ] || { echo "{\"ok\":false,\"error\":\"$BRIEF missing\"}" >&2; exit 2; }
 [ -d "$SITE" ]  || { echo "{\"ok\":false,\"error\":\"$SITE missing — run scaffold-site.sh first\"}" >&2; exit 2; }
 
-# Refuse to clobber an existing module — the orchestrator's resume logic
-# decides what to skip; this script just creates fresh.
-for f in "$PAGE" "$VAL" "$NT"; do
+# Refuse to clobber.
+for f in "$CONCEPT" "$VALIDATION" "$EX_INDEX" "$NT"; do
   if [ -e "$f" ]; then
     jq -nc --arg p "$f" '{ok: false, error: ("file already exists: " + $p)}'
     exit 1
   fi
 done
 
-# 1. hugo new — uses archetypes/modules.md.
-(cd "$SITE" && hugo new "modules/$SLUG/index.md" >/dev/null)
+# Helper: split a Hugo-generated file into its frontmatter and body parts.
+# Writes frontmatter to $1, body to $2, reads from $3.
+split_fm_body() {
+  awk -v fm="$1" -v body="$2" '
+    /^---$/ { c++; if (c==1) {next}; if (c==2) {next} }
+    c==1 { print > fm; next }
+    { print > body }
+  ' "$3"
+}
 
-# 2. Patch frontmatter from brief.
-# Read the frontmatter block, splice in brief values via yq, write back.
-FM_FILE="$(mktemp)"
-BODY_FILE="$(mktemp)"
-trap 'rm -f "$FM_FILE" "$BODY_FILE"' EXIT
+# Helper: reassemble a fronmatter file + body file into a single markdown file.
+write_with_fm() {
+  local fm="$1" body="$2" out="$3"
+  {
+    printf -- '---\n'
+    cat "$fm"
+    printf -- '---\n'
+    cat "$body"
+  } > "$out"
+}
 
-awk -v fm="$FM_FILE" -v body="$BODY_FILE" '
-  /^---$/ { c++; if (c==1) {next}; if (c==2) {next} }
-  c==1 { print > fm; next }
-  { print > body }
-' "$PAGE"
+# ── 1. Concept page (_index.md) ──────────────────────────────
+(cd "$SITE" && hugo new --kind modules "modules/$SLUG/_index.md" >/dev/null)
 
-# Extract from the brief.
+FM=$(mktemp); BODY=$(mktemp)
+trap 'rm -f "$FM" "$BODY"' EXIT
+split_fm_body "$FM" "$BODY" "$CONCEPT"
+
 TITLE=$(yq '.title' "$BRIEF")
 WEIGHT=$(yq '.weight' "$BRIEF")
 DQ=$(yq '.driving_question' "$BRIEF")
@@ -78,37 +98,32 @@ CONTRAST_ALT=$(yq '.contrast.alternative' "$BRIEF")
 CONTRAST_WHEN=$(yq '.contrast.when_alternative_wins' "$BRIEF")
 PRIOR=$(yq '.prior_ends_with' "$BRIEF")
 NEXT=$(yq '.next_expects' "$BRIEF")
-SUMMARY=$(yq '.driving_question' "$BRIEF")  # default; agent can refine in body if it wants.
-
-# Read concepts as a YAML list (string array).
+SUMMARY=$(yq '.driving_question' "$BRIEF")
 CONCEPTS_YAML=$(yq -o=json '.concepts' "$BRIEF" | jq -c '.')
 
-# Patch fields. yq operates in-place when invoked with -i.
-yq -i ".title = \"$TITLE\"" "$FM_FILE"
-yq -i ".weight = $WEIGHT" "$FM_FILE"
-yq -i ".driving_question = \"$DQ\"" "$FM_FILE"
-yq -i ".contrast.alternative = \"$CONTRAST_ALT\"" "$FM_FILE"
-yq -i ".contrast.when_alternative_wins = \"$CONTRAST_WHEN\"" "$FM_FILE"
-yq -i ".prior_ends_with = \"$PRIOR\"" "$FM_FILE"
-yq -i ".next_expects = \"$NEXT\"" "$FM_FILE"
-yq -i ".summary = \"$SUMMARY\"" "$FM_FILE"
-yq -i ".concepts = $CONCEPTS_YAML" "$FM_FILE"
+yq -i ".title = \"$TITLE\"" "$FM"
+yq -i ".weight = $WEIGHT" "$FM"
+yq -i ".driving_question = \"$DQ\"" "$FM"
+yq -i ".contrast.alternative = \"$CONTRAST_ALT\"" "$FM"
+yq -i ".contrast.when_alternative_wins = \"$CONTRAST_WHEN\"" "$FM"
+yq -i ".prior_ends_with = \"$PRIOR\"" "$FM"
+yq -i ".next_expects = \"$NEXT\"" "$FM"
+yq -i ".summary = \"$SUMMARY\"" "$FM"
+yq -i ".concepts = $CONCEPTS_YAML" "$FM"
 
-# Reassemble.
-{
-  printf -- '---\n'
-  cat "$FM_FILE"
-  printf -- '---\n'
-  cat "$BODY_FILE"
-} > "$PAGE"
+write_with_fm "$FM" "$BODY" "$CONCEPT"
 
-# 3. modules/<slug>/exercises/ — empty dir; agent populates.
-mkdir -p "$EX_DIR"
+# ── 2. Validation page ────────────────────────────────────────
+(cd "$SITE" && hugo new --kind validation "modules/$SLUG/validation.md" >/dev/null)
 
-# 4. VALIDATION.md from template, scenario inlined.
+# Replace the placeholder body with a seeded structure.
 SCENARIO=$(yq '.validation_scenario' "$BRIEF")
-cat > "$VAL" <<EOF
-# Validation: $TITLE
+VAL_FM=$(mktemp); VAL_BODY=$(mktemp)
+split_fm_body "$VAL_FM" "$VAL_BODY" "$VALIDATION"
+yq -i ".title = \"Validation: $TITLE\"" "$VAL_FM"
+yq -i ".weight = 100" "$VAL_FM"   # validation always sorts last among section pages
+
+cat > "$VAL_BODY" <<EOF
 
 ## Scenario
 
@@ -125,13 +140,34 @@ $SCENARIO
 ## Try it aloud
 
 Set a timer for 90 seconds. Cover the notes. Answer the scenario out loud. If
-you stumble on a specific concept, re-read that concept's paragraph in
-\`index.md\` and try again.
+you stumble on a specific concept, re-read that concept's paragraph in the
+module page and try again.
 EOF
 
-# 5. new_terms.yaml — empty list to append to.
+write_with_fm "$VAL_FM" "$VAL_BODY" "$VALIDATION"
+rm -f "$VAL_FM" "$VAL_BODY"
+
+# ── 3. Exercises section index ────────────────────────────────
+mkdir -p "$EX_DIR"
+cat > "$EX_INDEX" <<EOF
+---
+title: "Exercises: $TITLE"
+weight: 90
+draft: false
+---
+
+Hands-on tasks for this module. Each exercise has a starter scaffold with
+\`[TODO:]\` markers — fill them in and run the verification step.
+EOF
+
+# ── 4. new_terms.yaml (data file, not Hugo content) ───────────
+mkdir -p "$NT_DIR"
 echo '[]' > "$NT"
 
-# Output paths.
-jq -nc --arg i "$PAGE" --arg ex "$EX_DIR" --arg v "$VAL" --arg nt "$NT" \
-  '{ok: true, index_md: $i, exercises_dir: $ex, validation_md: $v, new_terms_yaml: $nt}'
+# ── Output ────────────────────────────────────────────────────
+jq -nc \
+  --arg c "$CONCEPT" \
+  --arg v "$VALIDATION" \
+  --arg ex "$EX_DIR" \
+  --arg nt "$NT" \
+  '{ok: true, concept_md: $c, validation_md: $v, exercises_dir: $ex, new_terms_yaml: $nt}'

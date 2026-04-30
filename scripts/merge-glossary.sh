@@ -85,9 +85,8 @@ fi
 # Sort and write glossary.md.
 {
   printf -- '---\ntitle: "Glossary"\ndraft: false\n---\n\n'
-  printf '# Glossary\n\n'
   jq -r 'to_entries | sort_by(.key) | .[] |
-    "## \(.key)\n\n\(.value.definition)\n\n*(source: \(.value.source))*\n"' <<< "$db"
+    "## \(.key)\n\n\(.value.definition)\n"' <<< "$db"
 } > "$OUT"
 
 # Conflicts (terms with non-empty .alternates).
