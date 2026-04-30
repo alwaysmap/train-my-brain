@@ -42,13 +42,18 @@ if git -C "$ROOT" rev-parse "$TAG" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Bump version.
-jq --arg v "$VERSION" '.version = $v' "$PLUGIN_JSON" > "$PLUGIN_JSON.tmp"
-mv "$PLUGIN_JSON.tmp" "$PLUGIN_JSON"
-echo "Updated .claude-plugin/plugin.json: $VERSION"
+# Bump version (or skip if plugin.json is already at target).
+CURRENT=$(jq -r '.version' "$PLUGIN_JSON")
+if [ "$CURRENT" = "$VERSION" ]; then
+  echo "plugin.json already at $VERSION — skipping bump commit, tagging current HEAD."
+else
+  jq --arg v "$VERSION" '.version = $v' "$PLUGIN_JSON" > "$PLUGIN_JSON.tmp"
+  mv "$PLUGIN_JSON.tmp" "$PLUGIN_JSON"
+  echo "Updated .claude-plugin/plugin.json: $CURRENT → $VERSION"
+  git -C "$ROOT" add .claude-plugin/plugin.json
+  git -C "$ROOT" commit -m "Release $TAG"
+fi
 
-git -C "$ROOT" add .claude-plugin/plugin.json
-git -C "$ROOT" commit -m "Release $TAG"
 git -C "$ROOT" tag "$TAG"
 git -C "$ROOT" push origin HEAD:main "$TAG"
 
