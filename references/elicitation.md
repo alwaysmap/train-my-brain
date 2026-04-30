@@ -264,29 +264,42 @@ Store the hue number. Use it in `site/hugo.yaml` as `params.hue`.
 
 ## Step 8 of 8: Typography
 
-**Ask (use ask_user_input, single-select):**
-> "Last one, promise. Are you more into public signage or printed books?
-> It picks the typography for your site."
+This is the only step where the question sounds whimsical. Don't skip the rationale — typography is load-bearing for a curriculum site (the user reads it for hours, not minutes), and the answer drives a real CSS decision the user can't easily reverse later.
 
-Options:
-- **Public signage** — clean humanist sans, like wayfinding, modern docs, app interfaces. Tight UI feel.
-- **Printed books** — classical serif with generous leading, like long-form essays and book chapters. Reading-room feel.
+**Ask (use the `ask_user_input` tool, single-select — render as a menu, not as free text):**
+
+Open with the why, then the menu. Suggested phrasing:
+
+> "Last one, and it's a fun one — but it matters more than it sounds.
+>
+> You're going to read this curriculum for hours, not minutes. The typeface decides whether you settle in or fight the page. There are two genuinely different reading patterns to choose between:
+>
+>   1) **Public signage feel** — humanist sans-serif, like good wayfinding or modern technical docs. Quick scanning, tight UI, app-like. Best when you'll dip in and out of modules.
+>
+>   2) **Printed book feel** — classical serif with generous leading, like a long-form essay or chapter. Best when you'll sit down and read straight through.
+>
+> Both render in light mode, dark mode, and high-contrast mode automatically based on your OS — so this isn't about appearance overrides, it's about the *reading rhythm*. Which one matches how you actually want to read this?"
+
+The `ask_user_input` tool call itself uses these two options:
+
+- `Public signage` — humanist sans (Inter / system-ui). Tight UI feel, scan-friendly.
+- `Printed books` — classical serif (Source Serif 4 / Charter / Georgia). Reading-room feel, sit-down-and-read.
 
 **Reflect back — then STOP:**
 
-- Signage → "Crisp humanist sans for headings and body, monospace for code. Reads like a well-set technical doc." [STOP]
-- Books → "Source-style serif for body, sans for UI chrome. Reads like a long-form essay or chapter. Wider line-height, classical feel." [STOP]
+- Signage → "Crisp humanist sans for body and headings, monospace for code. Reads like a well-set technical doc — easy to scan, easy to dip into." [STOP]
+- Books → "Classical serif for body, sans for UI chrome. Wider line-height, more breathing room, no scanning. Reads like a chapter you sit down with." [STOP]
 
 **Interpret:**
 
 | Answer | `font_preset` value | Body font (with system fallbacks) |
 |---|---|---|
 | Public signage | `signage` | Inter → system-ui → Helvetica Neue → sans-serif |
-| Printed books | `book`    | Source Serif 4 → Charter → Iowan Old Style → Georgia → serif |
+| Printed books  | `book`    | Source Serif 4 → Charter → Iowan Old Style → Georgia → serif |
 
-Store the chosen value as `font_preset`. Pass it to `scripts/scaffold-site.sh --font-preset <value>` and persist as `params.font_preset` in `site/hugo.yaml`.
+Store the chosen value as `step_8_font_preset`. Pass it to `scripts/scaffold-site.sh --font-preset <value>` and persist as `params.font_preset` in `site/hugo.yaml`.
 
-Both presets respect `prefers-color-scheme: dark` and `prefers-contrast: more` automatically — the user's OS setting drives the actual rendering.
+Both presets respect `prefers-color-scheme: dark` and `prefers-contrast: more` automatically — the user's OS setting drives actual rendering, so changing macOS to dark mode (or enabling Increase Contrast in Accessibility) just works.
 
 ---
 

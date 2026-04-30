@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5 — 2026-04-30
+
+### Changed
+
+- **Step 8 (typography) now opens with rationale.** v0.4.4 asked "Are you more into public signage or printed books?" with a one-liner ("It picks the typography for your site.") — which read as whimsical and gave no reason to care. v0.4.5 leads with why typography matters for a curriculum the learner reads for hours, frames each option around its *reading pattern* (scan-and-dip vs sit-and-read) rather than its *appearance*, and explicitly notes that dark mode + high-contrast still work in either preset. The `ask_user_input` instruction is sharpened so the menu renders as the picker UI, not as free text.
+
 ## 0.4.4 — 2026-04-30
 
 ### Added

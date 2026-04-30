@@ -1,7 +1,7 @@
 {
   "name": "tmb",
   "displayName": "Train My Brain",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "A Claude Code curriculum builder. Interviews you about your goal, researches the topic once up-front, designs a hands-on module sequence, then dispatches parallel module-builders that share canonical sources. Ships a local Hugo site with exercises, validation, and a deterministic consistency reviewer.",
   "author": {
     "name": "Dylan Thomas",
