@@ -6,17 +6,53 @@ A Claude Code plugin that builds structured, hands-on learning curricula. It int
 
 ## Quick Start
 
-1. **Install dependencies.** TMB shells out to four CLIs at runtime: `hugo` (extended), `yq`, `jq`, and `curl`. Run the preflight to check what's already installed and get an interactive install offer for what's missing:
+### 1. Install the plugin
 
-   ```sh
-   bash scripts/check-deps.sh
-   ```
+TMB ships through the `alwaysmap` marketplace. From your terminal:
 
-   On macOS with Homebrew this offers `brew install <missing>` interactively. On Linux it prints copy-paste commands (snap / apt / direct download — we don't auto-elevate `sudo`). See [Requirements](#requirements) for the full list and per-platform commands.
+```sh
+claude plugin marketplace add alwaysmap/alwaysmap-marketplace
+claude plugin marketplace update
+claude plugin install tmb@alwaysmap
+```
 
-2. **Install the plugin** from the alwaysmap marketplace: `/plugin install tmb@alwaysmap`.
+Verify it landed:
 
-3. From any directory where you want a curriculum to live, type `/tmb:help` to see commands, or jump straight to `/tmb:create`. The skill calls `check-deps.sh` as Phase 0 — if anything is missing, you'll get an install prompt before the interview starts.
+```sh
+claude plugin list
+```
+
+You should see `tmb` listed. The plugin is now available to every Claude Code session — start a new session (or run `/plugin reload` in an existing one) and the `/tmb:*` commands will be live.
+
+**Already have the marketplace added** (e.g., from installing `jfm`)? Skip to `claude plugin install tmb@alwaysmap`.
+
+**Updating later**: `claude plugin marketplace update && claude plugin install tmb@alwaysmap` pulls the latest tagged release. The marketplace.json in `alwaysmap/alwaysmap-marketplace` is auto-bumped by the release workflow whenever this repo tags a `v*`.
+
+### 2. Install runtime dependencies
+
+TMB shells out to four CLIs at runtime: `hugo` (extended), `yq`, `jq`, and `curl`. Run the preflight any time to check what's already installed and get an interactive install offer for what's missing:
+
+```sh
+# Inside the installed plugin directory, or from a curriculum folder:
+bash $(claude plugin path tmb@alwaysmap)/scripts/check-deps.sh
+```
+
+Or just run `/tmb:create` — it calls `check-deps.sh` as Phase 0 and offers install before the interview starts.
+
+On macOS with Homebrew this offers `brew install <missing>` interactively. On Linux it prints copy-paste commands (snap / apt / direct download — we don't auto-elevate `sudo`). See [Requirements](#requirements) below for the full per-platform install matrix.
+
+### 3. Build your first curriculum
+
+From any directory where you want a curriculum to live:
+
+```
+/tmb:help       # see every command
+/tmb:create     # build a curriculum
+```
+
+`/tmb:create` walks you through a 7-question interview, then runs autonomously for ~6–10 minutes (research → design → scaffold → parallel module-builders → reviewer → build → serve). At the end you get a working Hugo site at `http://localhost:1313`.
+
+Want to publish it online? See [Publishing online (GitHub Pages)](#publishing-online-github-pages).
 
 ## Commands
 
