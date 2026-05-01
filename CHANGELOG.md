@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.15 — 2026-05-01
+
+### Fixed
+
+- **Skill names dropped the redundant `tmb-` prefix.** Slash autocomplete previously surfaced two entries per command — e.g., both `/tmb:help` (the command shim) and `/tmb-help` (the underlying skill, named `tmb-help`). Two equally-valid forms is one too many, and the hyphenated form is the wrong one because the plugin namespace already provides `tmb:`. Skills are now named after the bare verb, so the picker shows only the `/tmb:<command>` form.
+
+  Renames inside the plugin (no user-facing slash form changes — `/tmb:create` etc. still work):
+  - `skills/tmb-create/`        → `skills/create/`        (`name: tmb-create` → `name: create`)
+  - `skills/tmb-review/`        → `skills/review/`        (`name: tmb-review` → `name: review`)
+  - `skills/tmb-add-module/`    → `skills/add-module/`    (`name: tmb-add-module` → `name: add-module`)
+  - `skills/tmb-rebuild-site/`  → `skills/rebuild-site/`  (`name: tmb-rebuild-site` → `name: rebuild-site`)
+  - `skills/tmb-help/`          → `skills/help/`          (`name: tmb-help` → `name: help`)
+
+  Each `commands/<name>.md` now invokes the bare skill name. Internal `skills/create/references/...` path references in `skills/create/SKILL.md` were updated to the new directory. `agents/tmb-*.md` keep the `tmb-` prefix — agents are referenced via `subagent_type` and don't appear in slash autocomplete, so there's no collision to clean up.
+
+  The v0.4.4 rationale for keeping `tmb-` on skill names ("picker disambiguation") no longer holds: the plugin namespace `tmb:` is the disambiguator, and doubling it just clutters the picker.
+
 ## 0.4.14 — 2026-05-01
 
 ### Fixed

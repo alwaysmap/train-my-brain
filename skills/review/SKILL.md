@@ -1,5 +1,5 @@
 ---
-name: tmb-review
+name: review
 description: >
   Use this skill when the user asks to re-check, re-review, or validate an
   existing TMB curriculum, or to apply previously-approved review flags.

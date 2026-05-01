@@ -1,5 +1,5 @@
 ---
-name: tmb-help
+name: help
 description: >
   Use this skill when the user types /tmb:help, asks "what can the tmb plugin
   do", "show TMB commands", or seems unsure which command to use. Pure-text

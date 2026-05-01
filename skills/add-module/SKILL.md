@@ -1,5 +1,5 @@
 ---
-name: tmb-add-module
+name: add-module
 description: >
   Use this skill when the user wants to add a single module to an existing
   curriculum. Triggers on "/tmb:add-module", "add a module", "insert a module

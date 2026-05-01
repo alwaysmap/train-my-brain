@@ -1,5 +1,5 @@
 ---
-name: tmb-create
+name: create
 description: >
   Use this skill when the user wants to build a learning curriculum, study plan,
   or "train their brain" on a topic. Triggers on "/tmb:create", "create a
@@ -29,14 +29,14 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 |------|-------------|
 | `SKILL.md` (this file) | Always — the workflow scaffold |
 | `references/elicitation.md` | Phase 1 — 8-step interview discipline |
-| `skills/tmb-create/references/curriculum-state.md` | Phase 2 — only when `detect-curriculum.sh` returns non-fresh |
+| `skills/create/references/curriculum-state.md` | Phase 2 — only when `detect-curriculum.sh` returns non-fresh |
 | `references/research-schema.md` | Phase 3 — what `research.yaml` must contain |
 | `references/spine-schema.md` | Phase 4 — what the designer produces |
 | `references/brief-schema.md` | Phase 4 — per-module brief contract |
 | `references/curriculum-design.md` | Phase 4 + Phase 7 — pedagogy rules |
 | `references/reviewer-policy.md` | Phase 8 — what the reviewer enforces |
-| `skills/tmb-create/references/delivery.md` | Phase 10 + 11 — tmux serve flow + delivery block |
-| `skills/tmb-create/references/quality-gates.md` | Before declaring delivery complete — 12-item green-check list |
+| `skills/create/references/delivery.md` | Phase 10 + 11 — tmux serve flow + delivery block |
+| `skills/create/references/quality-gates.md` | Before declaring delivery complete — 12-item green-check list |
 | `references/github-pages.md` | Phase 11 — only when the user asks how to publish online |
 
 ## Workflow
@@ -65,7 +65,7 @@ bash scripts/detect-curriculum.sh "<target>"
 
 **If `state == "fresh"`:** `mkdir -p "<target>"` and continue.
 
-**Otherwise**, read `skills/tmb-create/references/curriculum-state.md` for the per-state branch logic (`v0.4-partial` resume offer, `v0.3`/`v0.2` refusal messages, `non-tmb` refusal). The reference has the user-facing text verbatim.
+**Otherwise**, read `skills/create/references/curriculum-state.md` for the per-state branch logic (`v0.4-partial` resume offer, `v0.3`/`v0.2` refusal messages, `non-tmb` refusal). The reference has the user-facing text verbatim.
 
 ### Phase 3: Topic research
 
@@ -135,7 +135,7 @@ Surface errors verbatim.
 
 ### Phase 10: Serve
 
-**Read `skills/tmb-create/references/delivery.md`** — it has the tmux logic, readiness probe, and fallbacks.
+**Read `skills/create/references/delivery.md`** — it has the tmux logic, readiness probe, and fallbacks.
 
 ### Phase 11: Deliver
 
@@ -224,4 +224,4 @@ Examples:
 
 ## Quality gates
 
-Before declaring delivery complete, work through `skills/tmb-create/references/quality-gates.md` — a 12-item checklist covering preflight, interview, research, design, scaffold, bootstrap, builders, reviewer, build, and serve.
+Before declaring delivery complete, work through `skills/create/references/quality-gates.md` — a 12-item checklist covering preflight, interview, research, design, scaffold, bootstrap, builders, reviewer, build, and serve.

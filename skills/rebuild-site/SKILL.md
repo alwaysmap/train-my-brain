@@ -1,5 +1,5 @@
 ---
-name: tmb-rebuild-site
+name: rebuild-site
 description: >
   Use this skill when the user asks to refresh the Hugo layouts of an existing
   curriculum or rebuild the static site after a plugin upgrade. Triggers on
