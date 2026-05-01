@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.4.8 — 2026-04-30
+## 0.4.9 — 2026-04-30
+
+### Fixed
+
+- **Module list now renders as proper cards.** v0.4.3 used `<li>::before { content: counter(module) "." }` to inject the module number, but the next sibling was a block `<div>` so the counter ended up on its own line above the title. Plus there was no card styling — just a thin bottom border on each item.
+
+  v0.4.9 turns each `.module-item` into a 2-column CSS grid: column 1 is the counter (spans all rows), column 2 holds the title + summary + driving-question. Border + rounded corners + padding now make it look like an actual card. Hover states added: border tints primary, soft shadow, 1px translate, title colors. Dark-mode shadow tuned separately. Used on `/modules/` and `/modules/<slug>/exercises/` lists.
+
+  Pick up via `/tmb:rebuild-site` on existing curricula.
 
 ### Fixed
 

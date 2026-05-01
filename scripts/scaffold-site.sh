@@ -585,12 +585,59 @@ table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
 th, td { border: 1px solid var(--color-border); padding: 0.5rem 0.75rem; text-align: left; }
 th { background: var(--color-primary-soft); font-family: var(--font-ui); }
 
-/* Module list cards */
-.module-list { list-style: none; padding: 0; counter-reset: module; }
-.module-item { counter-increment: module; padding: 1rem 0; border-bottom: 1px solid var(--color-border); }
-.module-item::before { content: counter(module) "."; color: var(--color-muted); font-family: var(--font-ui); margin-right: 0.5rem; font-weight: 600; }
-.module-item-header a { font-family: var(--font-ui); font-weight: 600; text-decoration: none; }
-.driving-question-inline { color: var(--color-muted); font-style: italic; margin: 0.25rem 0 0; font-size: 0.95em; }
+/* Module list — actual cards, two-column grid so the counter sits next to content */
+.module-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  counter-reset: module;
+  display: grid;
+  gap: 0.75rem;
+}
+.module-item {
+  counter-increment: module;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  column-gap: 0.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.module-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 12px hsla(var(--hue), 30%, 30%, 0.08);
+  transform: translateY(-1px);
+}
+.module-item::before {
+  content: counter(module);
+  color: var(--color-muted);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: start;
+  justify-self: start;
+}
+.module-item > * { grid-column: 2; margin: 0; }
+.module-item > * + * { margin-top: 0.35rem; }
+.module-item-header a {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: var(--color-text);
+  display: block;
+  line-height: 1.3;
+}
+.module-item:hover .module-item-header a { color: var(--color-primary); }
+.driving-question-inline { color: var(--color-muted); font-style: italic; font-size: 0.95em; }
+@media (prefers-color-scheme: dark) {
+  .module-item:hover { box-shadow: 0 2px 12px hsla(var(--hue), 50%, 5%, 0.4); }
+}
 
 /* Module concept page */
 .module-header { border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
