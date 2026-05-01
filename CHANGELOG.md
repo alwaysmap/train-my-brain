@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.8 — 2026-04-30
+
+### Fixed
+
+- **Driving question rendered twice on module pages.** v0.4.3's `new-module.sh` defaulted `summary = driving_question`, and `module/section.html` rendered both fields independently — so the question appeared once as a `<p class="summary">` and again immediately below as a `<p class="driving-question">` callout. Two fixes:
+  - `module/section.html` now skips `summary` when it equals `driving_question`. Defense in depth — even if a module's frontmatter has both set to the same string, only the callout renders.
+  - `new-module.sh` no longer defaults `summary` to the driving question. It writes `summary: ""` and lets the module-builder fill it in only when there's a genuinely separate one-sentence framing to add.
+
+  Existing curricula picked up via `/tmb:rebuild-site`. Authors can also edit `site/content/modules/<slug>/_index.md` to clear duplicate `summary` lines manually if they prefer.
+
 ## 0.4.7 — 2026-04-30
 
 ### Fixed

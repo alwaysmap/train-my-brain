@@ -366,8 +366,11 @@ cat > "$TARGET/site/layouts/module/section.html" <<'EOF'
   <header class="module-header">
     {{ if .Params.weight }}<span class="module-number">Module {{ .Params.weight }}</span>{{ end }}
     <h1>{{ .Title }}</h1>
-    {{ with .Params.summary }}<p class="summary">{{ . }}</p>{{ end }}
-    {{ with .Params.driving_question }}<p class="driving-question"><strong>{{ . }}</strong></p>{{ end }}
+    {{/* Show summary only when it adds info beyond the driving question. */}}
+    {{ $summary := .Params.summary }}
+    {{ $dq := .Params.driving_question }}
+    {{ if and $summary (ne $summary $dq) }}<p class="summary">{{ $summary }}</p>{{ end }}
+    {{ with $dq }}<p class="driving-question"><strong>{{ . }}</strong></p>{{ end }}
     {{ with .Params.blog_post }}
     <p class="blog-link"><a href="{{ . }}" target="_blank" rel="noopener">Read the blog post &#8599;</a></p>
     {{ end }}

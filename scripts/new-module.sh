@@ -98,7 +98,6 @@ CONTRAST_ALT=$(yq '.contrast.alternative' "$BRIEF")
 CONTRAST_WHEN=$(yq '.contrast.when_alternative_wins' "$BRIEF")
 PRIOR=$(yq '.prior_ends_with' "$BRIEF")
 NEXT=$(yq '.next_expects' "$BRIEF")
-SUMMARY=$(yq '.driving_question' "$BRIEF")
 CONCEPTS_YAML=$(yq -o=json '.concepts' "$BRIEF" | jq -c '.')
 
 yq -i ".title = \"$TITLE\"" "$FM"
@@ -108,7 +107,11 @@ yq -i ".contrast.alternative = \"$CONTRAST_ALT\"" "$FM"
 yq -i ".contrast.when_alternative_wins = \"$CONTRAST_WHEN\"" "$FM"
 yq -i ".prior_ends_with = \"$PRIOR\"" "$FM"
 yq -i ".next_expects = \"$NEXT\"" "$FM"
-yq -i ".summary = \"$SUMMARY\"" "$FM"
+# Leave summary empty — it's an OPTIONAL one-sentence framing that adds info
+# beyond the driving question. Module-builders can fill it in when they have
+# something useful to say; otherwise the layout skips the field. Pre-v0.4.8
+# defaulted summary = driving_question, which produced a duplicate render.
+yq -i '.summary = ""' "$FM"
 yq -i ".concepts = $CONCEPTS_YAML" "$FM"
 
 write_with_fm "$FM" "$BODY" "$CONCEPT"
