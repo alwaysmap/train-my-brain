@@ -82,12 +82,25 @@ if [ -d "$MODULES_DIR" ]; then
   done
 fi
 
-# Sort and write glossary.md.
-{
-  printf -- '---\ntitle: "Glossary"\ndraft: false\n---\n\n'
-  jq -r 'to_entries | sort_by(.key) | .[] |
-    "## \(.key)\n\n\(.value.definition)\n"' <<< "$db"
-} > "$OUT"
+# Sort and write glossary.md to both locations:
+#   1. <root>/glossary.md             — data file at curriculum root (canonical)
+#   2. <root>/site/content/glossary.md — Hugo content (the served URL /glossary/)
+# Both files are bit-for-bit identical. The Hugo layout's <h1>{{ .Title }}</h1>
+# renders the heading from frontmatter, so we do NOT prepend a `# Glossary`
+# heading to the body — that would render as a duplicate.
+write_glossary() {
+  local out="$1"
+  {
+    printf -- '---\ntitle: "Glossary"\ndraft: false\n---\n\n'
+    jq -r 'to_entries | sort_by(.key) | .[] |
+      "## \(.key)\n\n\(.value.definition)\n"' <<< "$db"
+  } > "$out"
+}
+
+write_glossary "$OUT"
+if [ -d "$ROOT/site/content" ]; then
+  write_glossary "$ROOT/site/content/glossary.md"
+fi
 
 # Conflicts (terms with non-empty .alternates).
 conflicts=$(jq -c '[to_entries[] | select(.value.alternates | length > 0) |

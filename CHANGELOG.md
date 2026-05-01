@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.4.9 — 2026-04-30
+## 0.4.10 — 2026-04-30
+
+### Fixed
+
+- **Glossary page no longer shows duplicate "Glossary" heading or `(source: research.yaml)` attributions.** Both bugs were already fixed in v0.4.3's `merge-glossary.sh` rewrite, but two issues stuck around:
+  - `merge-glossary.sh` only wrote `<root>/glossary.md` (the data file at curriculum root). Hugo serves from `<root>/site/content/glossary.md`, which was getting copy-mirrored by an older mechanical-fix step in the reviewer agent that ran v0.4.2-era code. Result: the served Hugo page kept showing the old format.
+  - The Hugo layout renders `<h1>{{ .Title }}</h1>` from frontmatter, but the older `merge-glossary.sh` also wrote `# Glossary` as the first body line — a duplicate heading.
+
+  Now `merge-glossary.sh` writes BOTH locations atomically (`<root>/glossary.md` AND `<root>/site/content/glossary.md`), bit-for-bit identical, with no body-level `# Glossary` heading and no source attributions. Existing curricula pick up via `/tmb:review` (which calls the reviewer, which calls merge-glossary.sh).
+
+  Also swept the codebase: no other scripts/templates emit `(source:` or duplicate-heading patterns.
 
 ### Fixed
 
