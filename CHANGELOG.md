@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.14 — 2026-05-01
+
+### Fixed
+
+- **Plugin `homepage` now points at the GitHub repo** (`https://github.com/alwaysmap/train-my-brain`) so "open home page" from the Claude Code CLI loads the source repo instead of an unrelated marketing URL.
+
 ## 0.4.13 — 2026-04-30
 
 ### Added
