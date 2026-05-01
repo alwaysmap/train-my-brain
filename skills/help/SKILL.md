@@ -46,6 +46,12 @@ Train My Brain (TMB) — commands
     curriculum without touching content/ or modules/. Rebuilds the static
     output. Use when the plugin's scaffold templates have evolved.
 
+/tmb:publish
+    Publishes the current curriculum to GitHub Pages via the `gh` CLI.
+    Interactive walkthrough — confirms the repo name, creates it, enables
+    Pages, watches the first deploy, and prints the live URL. Requires
+    `gh` installed and authenticated.
+
 /tmb:help
     Shows this message.
 
@@ -54,20 +60,18 @@ Requirements
   hugo (extended) >= 0.120, yq, jq, curl — used by the determinism scripts.
 
   Run the preflight any time:
-      bash scripts/check-deps.sh
+      bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
   On macOS+brew it offers `brew install <missing>` interactively. On Linux
   it prints copy-paste install commands (no auto-sudo). Every TMB command
   runs this same preflight as Phase 0, so you can also just run /tmb:create
   and let it tell you what's missing.
 
 Publishing online (GitHub Pages)
-  Every curriculum scaffolds with a ready-to-go .github/workflows/deploy.yml.
-  Quick path (with gh CLI):
-      cd <curriculum-slug>
-      git init && git add . && git commit -m "Initial curriculum"
-      gh repo create <username>/<slug> --public --source=. --push
-      # then: repo Settings → Pages → Source = "GitHub Actions"
-  Full guide (manual flow, custom domains, troubleshooting):
+  cd into the curriculum folder, then:
+      /tmb:publish
+  Walks you through gh auth, repo creation, Pages enablement, and
+  watching the first deploy. Requires `gh` installed and authenticated.
+  Full reference (manual flow, custom domains, troubleshooting):
       references/github-pages.md
 
 More

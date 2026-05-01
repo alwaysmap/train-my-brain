@@ -32,8 +32,16 @@ Via the prompt:
 
 ## Preconditions
 
+First, confirm the plugin scripts are reachable. If `${CLAUDE_PLUGIN_ROOT}` is empty or the `scripts/` directory under it is missing, **stop immediately** — do not fall back to manually inspecting files. Manual mode silently drops critical artifacts (the glossary build, frontmatter sync, URL checks) and produces a `review.md` that *looks* complete but isn't.
+
 ```bash
-bash scripts/detect-curriculum.sh "<curriculum_root>"
+[ -d "${CLAUDE_PLUGIN_ROOT}/scripts" ] || { echo "reviewer: cannot locate plugin scripts (CLAUDE_PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-<unset>}). The plugin install may be broken — re-install via /plugin." >&2; exit 2; }
+```
+
+Then:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-curriculum.sh "<curriculum_root>"
 ```
 
 If the JSON `state` is `non-tmb` or `v0.2`, write a clear refusal to `review.md` and exit:
@@ -62,11 +70,12 @@ You do **not** re-read every brief, every page, every new_terms.yaml. The script
 Read-only checks first; capture each script's JSON to a variable.
 
 ```bash
-ADJACENCY=$(bash scripts/check-adjacency.sh "<curriculum_root>")
-FRONTMATTER=$(bash scripts/check-frontmatter.sh "<curriculum_root>")
-URLS=$(bash scripts/check-urls.sh "<curriculum_root>")
-AI_PROSE=$(bash scripts/check-ai-prose.sh "<curriculum_root>")
-GLOSSARY=$(bash scripts/merge-glossary.sh "<curriculum_root>")
+ADJACENCY=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-adjacency.sh "<curriculum_root>")
+FRONTMATTER=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-frontmatter.sh "<curriculum_root>")
+URLS=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-urls.sh "<curriculum_root>")
+AI_PROSE=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-ai-prose.sh "<curriculum_root>")
+GLOSSARY=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/merge-glossary.sh "<curriculum_root>")
+CITATIONS=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-citations.sh "<curriculum_root>")
 ```
 
 Each returns `{ok: bool, ...details}`. Treat any `ok: false` as a candidate for a substantive flag (URL reachability is the exception — non-2xx is a real problem).
@@ -74,7 +83,7 @@ Each returns `{ok: bool, ...details}`. Treat any `ok: false` as a candidate for 
 Then run the mutations:
 
 ```bash
-LINKED=$(bash scripts/link-glossary.sh "<curriculum_root>")
+LINKED=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/link-glossary.sh "<curriculum_root>")
 ```
 
 `link-glossary.sh` writes `{{< gloss "..." >}}` shortcodes into module pages, wrapping the first occurrence of every known glossary term. Count `LINKED.links_added | length` and report it as a mechanical-fix entry. The script is idempotent — running it twice on the same curriculum is a no-op.
@@ -86,7 +95,7 @@ Fixes that are obviously safe and cannot have user-meaningful tradeoffs. In `ful
 1. **Frontmatter sync.** For every entry in `FRONTMATTER.mismatches`, edit the module's `_index.md` so its frontmatter matches the brief. The brief is authoritative.
 2. **Hugo archetype defaults.** For any page missing `date` / `draft`, fill with today / `false`.
 3. **Weight collisions.** Group modules by weight; the lower-position-in-briefs-dir keeps it; subsequent ones shift to the next free integer. Update brief AND frontmatter.
-4. **Glossary merge.** Already done by `merge-glossary.sh`; confirm it wrote `glossary.md` and capture the term count + conflict list.
+4. **Glossary merge.** Already done by `merge-glossary.sh`; confirm it wrote `glossary.md` and capture the term count, conflict list, AND `missing_references` list. Every glossary entry must carry at least one external `Learn more:` link — the merge script reports any term whose `references[]` is empty in the `missing_references` array, and Phase C surfaces each as a substantive flag.
 5. **Glossary auto-linking.** Already done by `link-glossary.sh`; report `links_added` count.
 6. **Link format normalization.** Rewrite absolute `/site/...` links as site-relative `../NN-slug/`; rewrite bare `<URL>` angle-brackets as `[URL](URL)`.
 
@@ -102,6 +111,8 @@ The script outputs already enumerate most candidate flags. Your job is to:
    - `URLS.unhealthy` → category `reading_url`
    - `AI_PROSE.hits` → category `ai_prose`
    - `GLOSSARY.conflicts` → category `glossary_conflict`
+   - `GLOSSARY.missing_references` → category `glossary_no_references`. One flag per term whose `references[]` is empty after the merge. The reader can't learn more about the term — every glossary entry must carry at least one external `Learn more:` link.
+   - `CITATIONS.under_threshold` → category `low_citation_density`. One flag per module whose concept page has fewer than 4 inline footnote citations. A module with 0–3 footnotes reads as AI hallucination — the learner can't verify the claims and can't cite them back to colleagues. Surface the actual count vs the threshold (4) in the flag detail.
 2. **Add LLM-only checks.** A few things scripts can't catch — surface these too:
    - **contrast** — module page has fewer than 3 rows in its comparison table, or no row shows the alternative winning.
    - **driving_question** — empty, matches `^What is [A-Z]?$`, or fewer than 4 words.
@@ -128,6 +139,7 @@ For each flag in existing `review.md` with `approved: true`:
 - **adjacency** — edit both modules' frontmatter so `next_expects` / `prior_ends_with` match. Use the longer, more specific wording.
 - **reading_url** — if `suggested_fix` field contains a replacement URL, apply it to the brief and frontmatter.
 - **glossary_conflict** — if `suggested_fix` contains a canonical definition, apply it to `glossary.md`.
+- **glossary_no_references** — if `suggested_fix` contains a YAML `references:` list with `{label, url}` items, apply it to the appropriate source (`research.yaml.glossary[].references[]` for canonical terms, the matching module's `new_terms.yaml[].references[]` for module-local terms). Then re-run `merge-glossary.sh` to pick up the new links. If no `suggested_fix` is supplied, append `applied: false; reason: requires research to find authoritative source` — the user resolves these manually because picking the right source is editorial judgement.
 - **contrast / driving_question / running_example / ai_prose / brief_contradiction / definition_drift** — no auto-fix exists. Append `applied: false; reason: requires manual prose edit` to the flag.
 
 ### Phase E: Write review.md

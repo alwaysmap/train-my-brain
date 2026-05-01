@@ -92,6 +92,7 @@ trap 'rm -f "$FM" "$BODY"' EXIT
 split_fm_body "$FM" "$BODY" "$CONCEPT"
 
 TITLE=$(yq '.title' "$BRIEF")
+SHORT_TITLE=$(yq '.short_title' "$BRIEF")
 WEIGHT=$(yq '.weight' "$BRIEF")
 DQ=$(yq '.driving_question' "$BRIEF")
 CONTRAST_ALT=$(yq '.contrast.alternative' "$BRIEF")
@@ -101,6 +102,7 @@ NEXT=$(yq '.next_expects' "$BRIEF")
 CONCEPTS_YAML=$(yq -o=json '.concepts' "$BRIEF" | jq -c '.')
 
 yq -i ".title = \"$TITLE\"" "$FM"
+yq -i ".short_title = \"$SHORT_TITLE\"" "$FM"
 yq -i ".weight = $WEIGHT" "$FM"
 yq -i ".driving_question = \"$DQ\"" "$FM"
 yq -i ".contrast.alternative = \"$CONTRAST_ALT\"" "$FM"

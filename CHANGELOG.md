@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.4.17 — 2026-05-01
+
+### Added — design system rewrite + theme switch + content-quality gates
+
+The default Hugo site has been redesigned as a coherent design system rather than a collection of ad-hoc styles. The whole front-end was previously incoherent: triadic colors auto-derived from the user's `--hue` produced clashing pairs (fuchsia 320° + olive 80° was the worst case), every page leaked monotone primary, and the mobile sidebar dumped an 8-card overlay onto small viewports. This release rewrites `scripts/scaffold-site.sh`'s template/CSS heredocs into a single coherent system, adds a system/light/dark theme switch, requires citation density and Mermaid diagrams from module-builders, and ships an About page in every scaffolded curriculum.
+
+#### Color system
+
+- **One chromatic accent + one mathematical complement.** `--color-primary` is the user's `--hue`; `--color-link` is `hsla(calc(var(--hue) + 180), 55%, 32%, 1)` — the complement, derived not picked. Headings/structure use primary; body links + small annotation roles (numerals, eyebrows, prev/next labels, heading anchors) use the complement. The pair is harmonious for every starting hue (fuchsia ↔ green, teal ↔ rust, orange ↔ teal, etc.) because the math is symmetric.
+- **`--color-triadic` and `--color-analogous` are defined but no longer used in the default UI.** They remain available for opt-in customization but ship inert because auto-derived triadic clashes for most user hues.
+- **Neutrals are warm and hue-INdependent**: `--color-bg` is `hsl(40, 30%, 98%)` (cream canvas), `--color-text` is `hsl(230, 18%, 14%)` (ink with subtle blue). Identical regardless of which primary the user picked.
+
+#### Theme switch
+
+- **System / Light / Dark toggle in the top nav.** Three-segment icon group; choice persists to `localStorage["tmb-theme"]`. An inline pre-paint `<script>` in `baseof.html` applies the saved theme before any styles render, so there is no flash of the wrong theme on page load. "System" removes the `data-theme` attribute, falling back to `prefers-color-scheme`.
+- **Dark-mode tokens factored** into a single `html[data-theme="dark"]` block, with a `:not([data-theme])` guard that re-applies the same tokens via `@media (prefers-color-scheme: dark)` when the user has not picked an explicit override. No duplicated rules.
+
+#### Composition
+
+- **Whole module cards are clickable** — entire `<li>` is wrapped in a single `.module-item-link` anchor. Default state: hairline border. Hover: border tightens to primary, background swaps to a `linear-gradient(135deg, var(--color-primary-fade), var(--color-bg) 70%)`, lifts 1px. No more click-target-on-title-only.
+- **Heading anchor links** via a Hugo render hook (`layouts/_default/_markup/render-heading.html`). Every Markdown-sourced `h2..h6` gets a `#` that fades in on hover; clicking pushes the hash to the URL bar so any section is shareable.
+- **Editorial home hero** — the page title sits as full-bleed type with a small primary→complement gradient rule beneath, not as a card-on-canvas hero. The card-in-card-in-card pattern from prior releases is gone.
+- **Driving question reads as a quoted pull-quote** (italic, muted, primary left-strip, no fill) instead of a heavy second callout that competed with the h1 above it.
+- **Section rules removed.** Major heading separation comes from generous top margin alone; horizontal rules above/below `h2`, on `.module-header`, and on `.single > header` were removed because they signaled "section starts here" when the actual semantic was "section ends below".
+- **Headings render in `font-variant-caps: all-small-caps`** with a slight letter-spacing — editorial calm, scans well at long titles ("Data: What Goes In Before Training Starts"), supported across both `signage` and `book` font presets.
+- **Mobile sidebar is `display: none`.** The top nav has Modules / Glossary / About entry points; the sidebar that previously dumped 8 cards above the viewport on phones is gone. The brand title is also hidden on mobile (it's already in the browser tab + the page h1).
+
+#### A11y
+
+- **`:focus-visible` ring on every interactive element** (2px primary, 3px offset).
+- **Skip-to-content link** in `baseof.html` — visible on focus, jumps to `#main`.
+- **`prefers-reduced-motion`** blanket override forces 0.01ms transitions/animations.
+- **Verified contrast**: body 14.8:1 (AAA), muted 6.4:1 (AAA), faint 4.7:1 (AA), primary text 5.6:1 (AA-normal/AAA-large) against the new warm cream canvas.
+
+#### Content-quality gates (LLM output requirements)
+
+- **`tmb-module-builder` now requires inline footnote citations.** Every concept page must carry at least 4 Markdown footnote definitions (`[^name]: As X explains: "..." — Source (year), URL`). Pure prose without sources reads as AI hallucination — and a learner trying to build credibility on a topic must be able to verify what they're learning AND cite their sources back to colleagues.
+- **`tmb-module-builder` requires at least one Mermaid diagram in the mechanism section.** The scaffold wires up the render hook; concept-heavy modules without a visual reify the AI-slop concern.
+- **`tmb-researcher` now captures `excerpt` per `sources[].sections[]`.** A 1–3 sentence verbatim quote that builders use as the body of an inline footnote. Without excerpts, builders can only cite bare URLs and citations don't let the reader verify a claim without leaving the page.
+- **`scripts/check-citations.sh`** — new reviewer script. Counts footnote definitions per module concept page; flags any module under the threshold (4) as a `low_citation_density` substantive flag in `review.md`.
+- **`scripts/validate-research.sh`** — soft-warns when more than half of the source sections lack `excerpt` fields.
+
+#### About page + README
+
+- **Every scaffolded curriculum now ships an About page** (`site/content/about.md`, served at `/about/`) explaining what TMB is, how to install the plugin, and how to edit/publish the curriculum. Generated from `curriculum-templates/about.md.tmpl` if missing — never clobbers an existing about page.
+- **`curriculum-templates/about.md.tmpl`** documents the Ctrl-C vs `./stop.sh` behavior — Ctrl-C works for foreground `./serve.sh`; `./stop.sh` is for the tmux-detached session that `/tmb:create` launches.
+
 ## 0.4.16 — 2026-05-01
 
 ### Changed

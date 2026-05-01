@@ -1,0 +1,51 @@
+# {{TITLE}}
+
+{{DESCRIPTION}}
+
+This is a [Train My Brain](https://github.com/alwaysmap/train-my-brain) curriculum — a hands-on learning site you can read locally or publish to GitHub Pages.
+
+## Run the site locally
+
+```sh
+./serve.sh        # start the dev server at http://localhost:1313
+./stop.sh         # stop it
+./build.sh        # rebuild static output into site/public/
+```
+
+`serve.sh` writes its PID to `.hugo.pid` so `stop.sh` can find it. If port 1313 is taken, pass `--port N`.
+
+Windows users: `serve.ps1`, `stop.ps1`, `build.ps1` are the PowerShell equivalents.
+
+## What's where
+
+| Path | What it is |
+|---|---|
+| `site/content/modules/<NN-slug>/_index.md` | Concept page for module NN |
+| `site/content/modules/<NN-slug>/validation.md` | "Can you explain this out loud?" check |
+| `site/content/modules/<NN-slug>/exercises/*.md` | Exercises (and their `-answer.md` counterparts) |
+| `briefs/<NN-slug>.yaml` | The brief each module was built from — edit and re-run `/tmb:review` |
+| `curriculum_spine.md` | Module sequence, glossary seed, running example |
+| `research.yaml` | Canonical glossary, sources, contrasts (every module shares it) |
+| `review.md` | Reviewer findings; flip `approved: true` and re-run `/tmb:review` to apply |
+
+## Edit the curriculum
+
+Open any markdown file in `site/content/modules/` and edit. Hugo's dev server hot-reloads.
+
+For structural changes — adding a module, re-running consistency checks — use the TMB plugin commands:
+
+```
+/tmb:add-module      # append or insert a new module
+/tmb:review          # re-run the consistency reviewer
+/tmb:rebuild-site    # refresh layouts/CSS after a plugin upgrade (won't touch content)
+```
+
+## Publish online
+
+```
+/tmb:publish
+```
+
+The skill walks you through `gh` auth, repo creation, enabling GitHub Pages, and watching the first deploy. Every subsequent `git push` redeploys via `.github/workflows/deploy.yml`.
+
+If you'd rather do it manually, the full guide is in the TMB plugin at `references/github-pages.md`.

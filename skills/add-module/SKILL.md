@@ -35,8 +35,8 @@ Add one module to an existing TMB v0.4 curriculum.
 ### Phase 0: Preflight
 
 ```bash
-bash scripts/check-deps.sh
-bash scripts/detect-curriculum.sh "$(pwd)"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-curriculum.sh "$(pwd)"
 ```
 
 Refuse unless `state` is `v0.4-complete`. (Partial means an unfinished `/tmb:create` — direct the user to resume that first.)
@@ -64,14 +64,14 @@ Agent(
 )
 ```
 
-The designer reads the existing spine + `research.yaml`, writes the new brief (and rewrites shifted briefs if inserting), then runs `bash scripts/validate-briefs.sh "$(pwd)"`.
+The designer reads the existing spine + `research.yaml`, writes the new brief (and rewrites shifted briefs if inserting), then runs `bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate-briefs.sh "$(pwd)"`.
 
 On gate failure: surface the error and stop. Do not bootstrap or dispatch the builder.
 
 ### Phase 4: Bootstrap module files
 
 ```bash
-bash scripts/new-module.sh "$(pwd)" "<NN-slug>"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/new-module.sh "$(pwd)" "<NN-slug>"
 ```
 
 `hugo new` + frontmatter patch + mkdir exercises/ + seed VALIDATION.md and new_terms.yaml. Pure shell, no LLM. On failure (e.g., module already exists), surface the error and stop.

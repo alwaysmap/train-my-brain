@@ -23,13 +23,31 @@ researcher_version: "0.4.0"                 # plugin version that produced it
 
 # Canonical glossary. Every module-builder MUST use these definitions
 # verbatim (or with trivial whitespace differences) when introducing terms.
+#
+# Every entry MUST carry at least one `references[]` link to an
+# authoritative external source where the reader can find additional
+# information. The reviewer rejects glossary entries with zero
+# references — see `references/reviewer-policy.md`. Glossary entries
+# without external links leave the reader stranded: the inline
+# definition explains the term in context, the references give them
+# somewhere to go when they want depth.
 glossary:
   - term: "Query plan"
     definition: "The ordered tree of operations the database will execute to satisfy a query."
     aliases: ["execution plan", "plan tree"]
+    references:
+      - label: "PostgreSQL — Using EXPLAIN"
+        url: "https://www.postgresql.org/docs/current/using-explain.html"
+      - label: "Use The Index, Luke — execution plans"
+        url: "https://use-the-index-luke.com/sql/explain-plan"
   - term: "Selectivity"
     definition: "Estimated fraction of rows a predicate will return; the planner uses it to choose access paths."
-  # ... 15 to 40 entries, depending on topic.
+    references:
+      - label: "PostgreSQL — Row estimation"
+        url: "https://www.postgresql.org/docs/current/row-estimation-examples.html"
+  # ... 15 to 40 entries, depending on topic. Every entry has
+  # references with at least one entry. Prefer URLs already listed
+  # under top-level `sources:` so links stay consistent.
 
 # Authoritative reading list with section anchors. The designer pulls
 # from this list when assigning reading.primary / reading.secondary to
@@ -41,9 +59,11 @@ sources:
       - id: "explain-output"
         anchor: "#using-explain-basics"
         why: "Anatomy of EXPLAIN output line-by-line."
+        excerpt: "Each plan node printed by EXPLAIN shows the operation, the estimated row count, and the estimated cost in arbitrary units calibrated against a sequential page fetch."
       - id: "buffers"
         anchor: "#using-explain-analyze"
         why: "How to read I/O cost numbers."
+        excerpt: "When BUFFERS is included with ANALYZE, the output reports shared/local hit and read counts so you can see exactly how much I/O each node performed."
     authority: "official-docs"
     last_checked: "2026-04-30"
   - title: "Use The Index, Luke — execution plans"
@@ -51,6 +71,7 @@ sources:
     sections:
       - id: "intro"
         why: "The most accessible third-party explainer; good for module 1 reading."
+        excerpt: "An execution plan is the database's recipe for fetching the data your query asks for; learning to read it is the single biggest leverage point for query performance."
     authority: "well-known-third-party"
     last_checked: "2026-04-30"
   # ... 4 to 10 sources.
@@ -107,8 +128,8 @@ open_questions:
 The reviewer's preflight (`scripts/validate-research.sh`, called from `tmb-researcher` itself before exit) requires:
 
 - `topic`, `goal`, `created`, `researcher_version` — all non-empty strings.
-- `glossary` — at least 5 entries; every entry has `term` and `definition`.
-- `sources` — at least 3 entries; every entry has `title`, `url` (http(s)://), and at least one `sections[]` item.
+- `glossary` — at least 5 entries; every entry has `term`, `definition`, AND `references` with at least one `{label, url}` item where `url` is `http(s)://`. The references give the reader somewhere to click for additional information — entries without them strand the reader at the inline definition.
+- `sources` — at least 3 entries; every entry has `title`, `url` (http(s)://), and at least one `sections[]` item. Each `sections[]` entry SHOULD include an `excerpt` (1–3 sentence verbatim quote) so module-builders can produce inline footnote citations rather than bare URL pointers.
 - `concept_map` — at least 5 entries; every entry has `concept` and `depends_on` (may be empty list).
 - `contrasts` — at least 2 entries; every entry has all four fields.
 - `authorities` — at least 2 entries.

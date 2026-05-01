@@ -24,7 +24,7 @@ BRIEFS_DIR="$ROOT/briefs"
 
 # Fields that must match between brief and frontmatter (string scalars).
 FIELDS=(
-  weight title driving_question
+  weight title short_title driving_question
   contrast.alternative contrast.when_alternative_wins
   prior_ends_with next_expects
 )

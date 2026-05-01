@@ -8,6 +8,7 @@ Each module in a TMB curriculum has a brief at `briefs/NN-slug.yaml`. The design
 # briefs/03-silica-viscosity.yaml
 weight: 3
 title: "Silica and viscosity"
+short_title: "Viscosity"
 driving_question: "Why does more silica make an eruption explosive rather than just slower?"
 concepts:
   - silica polymerization
@@ -47,7 +48,8 @@ next_expects: "The learner understands why viscosity drives explosive vs effusiv
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `weight` | integer | yes | 1..N position in the curriculum. Unique per curriculum. |
-| `title` | string | yes | Human-readable module title. Copied verbatim into Hugo frontmatter. |
+| `title` | string | yes | Human-readable module title. Copied verbatim into Hugo frontmatter. May be long ("Topic: explanatory subtitle"). |
+| `short_title` | string | yes | Sidebar label. **≤ 24 characters, no colon, ≤ 3 words ideally.** Used in the modules sidebar where every wrap costs scannability. The full `title` still shows on the module page header and on hover. |
 | `driving_question` | string | yes | Non-rhetorical question the module answers. No vague "explore" phrasing. |
 | `concepts` | list[string] | yes (3–5 items) | Named concepts in plain prose, not jargon. |
 | `contrast.alternative` | string | yes | The comparison target — an alternative approach, competing model, or adjacent concept. |

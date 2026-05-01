@@ -318,7 +318,7 @@ Free text. Accept anything. Acknowledge warmly and move on — no deep reflectio
 | blue, cobalt, navy | 215–240 |
 | indigo, periwinkle | 245–260 |
 | purple, violet, lavender | 265–285 |
-| magenta, pink, rose | 295–345 |
+| magenta, pink, rose, fuchsia, hot pink | 295–345 |
 | neutral (white, grey, black) | use 220 |
 
 Store the hue number. Use it in `site/hugo.yaml` as `params.hue`.

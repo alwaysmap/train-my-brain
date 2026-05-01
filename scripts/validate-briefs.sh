@@ -61,7 +61,7 @@ emit_gap() {
 # Per-brief checks.
 for b in "${sorted[@]}"; do
   # Required scalar fields (must be non-empty, non-placeholder).
-  for field in weight title driving_question \
+  for field in weight title short_title driving_question \
                contrast.alternative contrast.when_alternative_wins \
                prior_ends_with next_expects exercise_goal validation_scenario \
                reading.primary.url reading.primary.section \
@@ -73,6 +73,18 @@ for b in "${sorted[@]}"; do
         ;;
     esac
   done
+
+  # short_title constraints: <= 24 chars, no colon. Sidebar scannability gate.
+  st=$(yq '.short_title' "$b")
+  if [ -n "$st" ] && [ "$st" != "null" ]; then
+    st_len=${#st}
+    if [ "$st_len" -gt 24 ]; then
+      emit_gap "$b" "short_title is $st_len chars (max 24 — drop the subtitle)"
+    fi
+    case "$st" in
+      *:*) emit_gap "$b" "short_title contains a colon — split it: keep the part before the colon" ;;
+    esac
+  fi
 
   # Concepts: 3..5
   count=$(yq '.concepts | length' "$b")

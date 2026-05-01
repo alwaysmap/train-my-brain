@@ -49,9 +49,11 @@ Hard caps: ~12 `WebSearch` calls and ~15 `WebFetch` calls for the whole pass. Hi
    - Current canonical books / talks / long-running blog series.
    - Community-recognized authorities.
 
-3. **Write definitions from one good source.** For each glossary term, pick the most authoritative source you found and write a one-sentence plain-language definition from it. **Do NOT triangulate against a second source** — the reviewer's `merge-glossary.sh` catches inter-module conflicts later if a builder genuinely diverges.
+3. **Write definitions from one good source AND record the link.** For each glossary term, pick the most authoritative source you found and write a one-sentence plain-language definition from it. **Do NOT triangulate against a second source** — the reviewer's `merge-glossary.sh` catches inter-module conflicts later if a builder genuinely diverges. Add the source you defined from to that term's `references[]` list with a short `label` and the canonical `url`. **Every glossary entry MUST have at least one reference link** — the validator (`validate-research.sh`) rejects research.yaml with bare definitions, and entries without links strand the reader on the rendered glossary page with no way to learn more. Two or three references per term is fine when the topic warrants it; one is the floor, not the ceiling.
 
 4. **Capture section anchors when you naturally see them.** When skimming a source page you've already fetched, note any section IDs that are obvious anchors (`#using-explain-basics`, `#tuning`, etc.). **Do NOT separately fetch every page just to verify anchors** — `check-urls.sh` runs in the reviewer phase and catches dead URLs, and the cost of a bad anchor is a click, not a curriculum failure.
+
+   **Capture excerpts on every section.** For each `sections[]` entry, include an `excerpt` field — a 1–3 sentence verbatim quote pulled from that section. Module-builders use these as inline footnote citations: `[^cite]: As X explains: "<excerpt>" — Source title (year), URL`. Without excerpts, builders can only point at a URL, which doesn't let the learner verify the claim without leaving the page. Aim for excerpts that contain a specific factual claim (a number, a named technique, a definitional statement) — not headline marketing copy.
 
 5. **Build the concept map.** For each concept in scope, list its prerequisites *within this domain*. Concepts that depend on nothing are foundation modules; concepts deep in the dependency graph are later modules.
 
@@ -66,12 +68,14 @@ Hard caps: ~12 `WebSearch` calls and ~15 `WebFetch` calls for the whole pass. Hi
 Before writing `research.yaml`, run:
 
 ```bash
-bash scripts/validate-research.sh "<curriculum_root>"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate-research.sh "<curriculum_root>"
 ```
 
 If the gate returns `ok: false`, you have not done enough research. Iterate: do more searches, fill the gaps, run the gate again. Do not write a research.yaml that fails its own gate; the designer will reject it and the user will see a worse error than if you'd just kept searching.
 
 A common failure: glossary < 5 entries. If that happens, your scope is probably too narrow — recheck the interview's depth/breadth signal and broaden to adjacent terms the learner will encounter.
+
+A second common failure: glossary entries missing `references[]`. The validator now rejects this. While searching for definitions you've already opened the source pages — record the URL alongside the definition rather than going back later. If you genuinely can't find a stable external link for a term, the term is either too niche to belong in the glossary or it needs a different name that the field actually uses.
 
 ## Honest failure modes
 

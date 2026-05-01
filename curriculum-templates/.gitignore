@@ -4,3 +4,7 @@ site/resources/
 site/.hugo_build.lock
 .hugo.pid
 .DS_Store
+
+# Local Claude Code permission allowlist (machine-specific).
+# Re-scaffold from the TMB plugin if you need it on a fresh clone.
+.claude/settings.local.json

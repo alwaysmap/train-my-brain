@@ -61,13 +61,14 @@ Review: <target>/review.md
   - Mechanical fixes applied: <N>
   - Substantive flags waiting: <K>
 
-Want to publish this online?
-  See references/github-pages.md for the full push-and-publish flow.
-  Quick version (with the gh CLI installed):
-    cd <target>
-    git init && git add . && git commit -m "Initial curriculum"
-    gh repo create <your-username>/<slug> --public --source=. --push
-    # then enable Pages: repo Settings → Pages → Source = "GitHub Actions"
+Daily use:
+  README.md in the curriculum folder has the run/stop/edit/publish recap.
+
+Want to publish to GitHub Pages?
+  cd <target> && claude
+  Then run: /tmb:publish
+  (Walks you through gh auth, repo creation, Pages enablement,
+   and the first deploy watch — requires the `gh` CLI.)
 ```
 
 If `K > 0`, append:

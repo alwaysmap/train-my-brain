@@ -28,8 +28,8 @@ Refresh Hugo infrastructure in an existing curriculum without rewriting content,
 ## Phase 0: Preflight
 
 ```bash
-bash scripts/check-deps.sh
-bash scripts/detect-curriculum.sh "$(pwd)"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-curriculum.sh "$(pwd)"
 ```
 
 Branch on `state`:
@@ -44,7 +44,7 @@ If `site/` is missing entirely, refuse: *"No site/ directory found. If you want 
 ## Phase 1: Refresh layouts
 
 ```bash
-bash scripts/scaffold-site.sh --target "$(pwd)" --layouts-only
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/scaffold-site.sh --target "$(pwd)" --layouts-only
 ```
 
 This rewrites layouts, CSS, archetype, and the structural keys of `hugo.yaml` (preserving `title`, `description`, `author`, `hue`). It does NOT touch:

@@ -39,7 +39,7 @@ You do not read any sibling module's brief or content. You do not perform web se
 Before writing any prose, run:
 
 ```bash
-bash scripts/new-module.sh "<curriculum_root>" "<slug>"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/new-module.sh "<curriculum_root>" "<slug>"
 ```
 
 This produces (Hugo branch bundle layout):
@@ -75,11 +75,33 @@ Open with the driving question. Never with "In this module...".
 Structure:
 
 1. **The question.** One paragraph, anchored in `spine.running_example`.
-2. **The mechanism.** Walk through `brief.concepts` in order. For every term, look it up in `research.yaml.glossary` first, then `spine.glossary_seed`. Use the exact definition there (or paraphrase trivially).
+2. **The mechanism.** Walk through `brief.concepts` in order. For every term, look it up in `research.yaml.glossary` first, then `spine.glossary_seed`. Use the exact definition there (or paraphrase trivially). Open this section with **one Mermaid diagram** (see "Diagrams" below) — readers should see the shape of the mechanism before they read the prose explaining it.
 3. **Contrast.** A comparison table with the alternative from your brief. At least three rows. Include `brief.contrast.when_alternative_wins` as one row.
 4. **What this means for [running example].** Ground the mechanism back in the concrete example.
 5. **Reading.** Two-item list. Pull URL + section anchor verbatim from your brief.
 6. **Coming next.** One sentence mirroring `brief.next_expects`.
+
+### Diagrams
+
+Pure prose is a failure mode for concept-heavy modules. Every concept page must include **at least one Mermaid diagram** in the mechanism section. The scaffold wires up Mermaid via a render hook — any fenced code block tagged ```` ```mermaid ```` becomes an SVG diagram on the page. Pick the form that matches the concept:
+
+- `flowchart LR` for processes / pipelines / decision flows (most common).
+- `sequenceDiagram` when the concept is about ordered interactions between actors or systems.
+- `classDiagram` or a small `flowchart` when the concept is about relationships between entities.
+- `stateDiagram-v2` when the concept is a lifecycle with discrete states.
+
+Keep the diagram small (under ~10 nodes). The point is to give the reader a mental scaffold, not to render the full system. Don't add a diagram just to have one — but if your "mechanism" section has more than two concepts and no visual, you're doing the reader a disservice.
+
+Example block (literal — write it like this):
+
+````
+```mermaid
+flowchart LR
+    A[Raw input] --> B[Filter]
+    B --> C[Transform]
+    C --> D[Output]
+```
+````
 
 ### Glossary linking
 
@@ -90,6 +112,46 @@ The system uses {{</* gloss "Retrieval-Augmented Generation (RAG)" "RAG" */>}} t
 ```
 
 The first arg is the canonical term (matches the glossary entry). The second is optional display text. If you're not sure of the exact glossary key, use just one arg — `scripts/link-glossary.sh` runs in the reviewer phase as a backstop and converts plain mentions to gloss shortcodes.
+
+### Citations — every substantive claim must be sourced
+
+Pure prose without sources reads as AI hallucination — and a learner trying to build credibility on a topic must be able to verify what they're learning AND cite their sources back to colleagues. Sources also let the reader go deeper.
+
+**Hard rule: every concept page has at least 4 inline footnote citations.** Use Markdown footnote syntax — Hugo's Goldmark renders `[^name]` as a numbered superscript with a clickable link to a `[^name]: ...` definition at the bottom of the page.
+
+**What earns a footnote:**
+- A specific quantitative claim ("a 7B-parameter model uses ~14GB of fp16 weights").
+- A specific named technique or mechanism ("RLHF was introduced by Christiano et al. 2017").
+- A claim about how a real product/system works ("Anthropic's Constitutional AI uses a separate critique model").
+- Any "as X explains" / "according to" / "the canonical way to" claim.
+
+**What does NOT need a footnote:**
+- Pure pedagogy ("the way to think about this is...").
+- Common-knowledge transitions ("once that's done, the next step is...").
+
+**How to write the footnote.** Pull the source URL + section anchor + a short verbatim quote from `research.yaml.sources[].sections[].excerpt`. The footnote definition has the form:
+
+```
+[^cai]: As Anthropic's Constitutional AI paper explains: "Our approach uses
+    a list of principles to which the model must adhere..." — Bai et al.,
+    *Constitutional AI: Harmlessness from AI Feedback* (2022),
+    [arxiv.org/abs/2212.08073](https://arxiv.org/abs/2212.08073#sec-2)
+```
+
+Three pieces every footnote needs:
+1. A short quoted excerpt (1–3 sentences) — the reader can verify your claim without leaving the page.
+2. The source title + author/date.
+3. A clickable URL with the section anchor when the source has one.
+
+If `research.yaml.sources` doesn't have an `excerpt` field for the section you need, use the source title + URL alone — but flag it as a research gap (the researcher should have captured the excerpt).
+
+**Reading section is NOT a substitute for inline footnotes.** The "Reading" section at the bottom is for the 1–2 deep-dive references in the brief; footnotes are for *every claim in the prose*.
+
+Example of correctly-cited prose:
+
+> A common approach is to use a lightweight classifier trained on high-quality reference text (Wikipedia, curated books) to score every document in the raw corpus and filter below a threshold.[^datasel] This sounds clean, but it introduces a policy question that belongs in your review: whose definition of quality is the classifier using?
+>
+> [^datasel]: As the Hugging Face data-curation guide notes: "We trained a classifier on a small set of high-quality documents... and filtered the entire corpus by predicted quality score." — *FineWeb: decanting the web for the finest text data at scale*, [huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)
 
 ## Exercise pages
 
@@ -160,7 +222,12 @@ For every term you introduced inline that is NOT in `research.yaml.glossary` and
 ```yaml
 - term: "Polymerization"
   definition: "Chemical linking of small molecules into chains. In silicate melts, longer chains make the liquid more viscous."
+  references:
+    - label: "Britannica — Polymerization"
+      url: "https://www.britannica.com/science/polymerization"
 ```
+
+**Every entry MUST include `references[]` with at least one `{label, url}` item where `url` is `http(s)://`.** Glossary entries without external links strand the reader at the inline definition with no way to learn more. Pull URLs from `research.yaml.sources[].url` when possible so links stay consistent across modules; if your term needs a source the researcher didn't surface, supply a stable URL from a recognized authority (official docs, peer-reviewed paper, established explainer). Do NOT use unstable or paywall-blocked URLs.
 
 If you introduced no new terms, leave it as `[]`. Empty is correct when every term you needed was already in `research.yaml`.
 

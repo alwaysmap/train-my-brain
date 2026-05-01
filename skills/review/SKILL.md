@@ -29,13 +29,13 @@ Run the TMB consistency reviewer against the current directory. Delegate to the 
 ## Phase 0: Preflight
 
 ```bash
-bash scripts/check-deps.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
 Stop on non-zero. Then:
 
 ```bash
-bash scripts/detect-curriculum.sh "$(pwd)"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-curriculum.sh "$(pwd)"
 ```
 
 Branch on the JSON `state`:

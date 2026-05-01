@@ -44,7 +44,7 @@ Before producing output:
 - `references/spine-schema.md` — authoritative spine format.
 - `references/brief-schema.md` — authoritative brief format.
 
-If `research.yaml` is missing or fails `bash scripts/validate-research.sh "<curriculum_root>"`, stop with:
+If `research.yaml` is missing or fails `bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate-research.sh "<curriculum_root>"`, stop with:
 
 ```
 designer: research.yaml missing or invalid.
@@ -83,7 +83,8 @@ For each brief, every field maps cleanly to research.yaml or the interview:
 | Field | Source |
 |---|---|
 | `weight` | sequencing decision |
-| `title` | your wording, plain language |
+| `title` | your wording, plain language. May be long ("Topic: explanatory subtitle"). |
+| `short_title` | your wording. **≤ 24 chars, no colon, ≤ 3 words ideally.** This goes in the sidebar where every line wrap costs scannability. Strip the subtitle from `title`: "Data: What Goes In Before Training" → `short_title: "Data"`. |
 | `driving_question` | your wording, but answerable using research.yaml entries only |
 | `concepts` | 3-5 entries from `research.yaml.concept_map` |
 | `contrast.alternative` | one of `research.yaml.contrasts[].alternative` |
@@ -109,7 +110,7 @@ Re-run /tmb:create or expand the researcher's pass.
 After writing all briefs, run:
 
 ```bash
-bash scripts/validate-briefs.sh "<curriculum_root>"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate-briefs.sh "<curriculum_root>"
 ```
 
 The script returns JSON. If `ok: false`:

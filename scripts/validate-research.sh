@@ -34,6 +34,15 @@ gc=$(yq '.glossary | length' "$R")
 # Each entry has term + definition.
 bad=$(yq '[.glossary[] | select((.term // "") == "" or (.definition // "") == "")] | length' "$R")
 [ "$bad" -gt 0 ] && add "$bad glossary entries missing term or definition"
+# Each entry has at least one reference link with http(s) URL. Glossary
+# entries without external references strand the reader at the inline
+# definition with no way to learn more — see references/research-schema.md.
+no_refs=$(yq '[.glossary[] | select((.references // []) | length == 0)] | length' "$R")
+[ "$no_refs" -gt 0 ] && add "$no_refs glossary entries missing references[] (every term needs at least one external link)"
+bad_refs=$(yq '[.glossary[] | select((.references // []) | length > 0) | .references[] | select((.url // "") | test("^https?://") | not)] | length' "$R")
+[ "$bad_refs" -gt 0 ] && add "$bad_refs glossary references have non-http(s) urls"
+no_label=$(yq '[.glossary[] | .references[]? | select((.label // "") == "")] | length' "$R")
+[ "$no_label" -gt 0 ] && add "$no_label glossary references missing label"
 
 # Sources >= 3 with sections[].
 sc=$(yq '.sources | length' "$R")
@@ -42,6 +51,19 @@ bad_src=$(yq '[.sources[] | select((.url // "") | test("^https?://") | not)] | l
 [ "$bad_src" -gt 0 ] && add "$bad_src sources have non-http(s) urls"
 no_sec=$(yq '[.sources[] | select((.sections // []) | length == 0)] | length' "$R")
 [ "$no_sec" -gt 0 ] && add "$no_sec sources have no sections"
+
+# Excerpts: every section SHOULD carry a 1-3 sentence verbatim quote so module-
+# builders can produce inline footnote citations (not bare URL pointers). Half
+# the sections missing excerpts is a coverage failure — modules will read as
+# AI-generated prose with footnotes that say nothing more than "see <URL>".
+sec_total=$(yq '[.sources[].sections[]?] | length' "$R")
+sec_no_excerpt=$(yq '[.sources[].sections[]? | select((.excerpt // "") == "")] | length' "$R")
+if [ "$sec_total" -gt 0 ] && [ "$sec_no_excerpt" -gt 0 ]; then
+  ratio=$(( sec_no_excerpt * 100 / sec_total ))
+  if [ "$ratio" -gt 50 ]; then
+    add "$sec_no_excerpt of $sec_total source sections missing excerpt (need >= 50% coverage so module-builders can cite quoted passages, not bare URLs)"
+  fi
+fi
 
 # Concept map >= 5.
 cc=$(yq '.concept_map | length' "$R")

@@ -31,33 +31,73 @@ MODULES_DIR="$ROOT/modules"
 
 normalize() { tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//'; }
 
-# Build a JSON object: { term: { definition, source, alternates: [{def, source}] } }
+# Build a JSON object:
+#   { term: { definition, source, references: [{label, url}], alternates: [{def, source}] } }
+# Every entry MUST end up with at least one reference — the reviewer
+# flags missing links as a finding. Rendered glossary.md emits the
+# references as a "Learn more" list per term.
 db='{}'
 
 add_term() {
-  local term="$1" def="$2" source="$3"
+  local term="$1" def="$2" source="$3" refs_json="$4"
   term_norm=$(printf '%s' "$term" | normalize)
   def_norm=$(printf '%s' "$def" | normalize)
   [ -z "$term_norm" ] && return
   [ -z "$def_norm" ] && return
+  [ -z "$refs_json" ] && refs_json='[]'
   current=$(jq -r --arg t "$term_norm" '.[$t].definition // ""' <<< "$db")
   if [ -z "$current" ]; then
-    db=$(jq -c --arg t "$term_norm" --arg d "$def" --arg s "$source" \
-      '.[$t] = {definition: $d, source: $s, alternates: []}' <<< "$db")
+    db=$(jq -c --arg t "$term_norm" --arg d "$def" --arg s "$source" --argjson r "$refs_json" \
+      '.[$t] = {definition: $d, source: $s, references: $r, alternates: []}' <<< "$db")
   else
     cur_norm=$(printf '%s' "$current" | normalize)
     if [ "$cur_norm" != "$def_norm" ]; then
       db=$(jq -c --arg t "$term_norm" --arg d "$def" --arg s "$source" \
         '.[$t].alternates += [{definition: $d, source: $s}]' <<< "$db")
     fi
+    # Even on a duplicate definition, accumulate references — later
+    # mentions may surface additional links the canonical entry missed.
+    if [ "$refs_json" != "[]" ]; then
+      db=$(jq -c --arg t "$term_norm" --argjson r "$refs_json" \
+        '.[$t].references = ((.[$t].references // []) + $r | unique_by(.url))' <<< "$db")
+    fi
   fi
+}
+
+# Extract glossary references for one term from a YAML file. Outputs
+# a compact JSON array `[{"label":..., "url":...}, ...]` on stdout, or
+# `[]` if the term has no references field. Uses yq → JSON → jq because
+# the system yq doesn't support `--arg` for inline string variables.
+extract_refs() {
+  local file="$1" term="$2"
+  yq -o=json '.glossary // []' "$file" 2>/dev/null \
+    | jq -c --arg t "$term" \
+        '[.[]? | select(.term == $t) | .references[]? | {label, url}]' \
+    2>/dev/null || echo '[]'
+}
+
+extract_spine_refs() {
+  local fm="$1" term="$2"
+  printf '%s' "$fm" | yq -o=json '.glossary_seed // []' - 2>/dev/null \
+    | jq -c --arg t "$term" \
+        '[.[]? | select(.term == $t) | .references[]? | {label, url}]' \
+    2>/dev/null || echo '[]'
+}
+
+extract_new_terms_refs() {
+  local file="$1" term="$2"
+  yq -o=json '. // []' "$file" 2>/dev/null \
+    | jq -c --arg t "$term" \
+        '[.[]? | select(.term == $t) | .references[]? | {label, url}]' \
+    2>/dev/null || echo '[]'
 }
 
 # 1. research.yaml (highest priority — written first, others append).
 if [ -f "$RESEARCH" ]; then
   while IFS=$'\t' read -r term def; do
     [ -z "$term" ] && continue
-    add_term "$term" "$def" "research.yaml"
+    refs=$(extract_refs "$RESEARCH" "$term")
+    add_term "$term" "$def" "research.yaml" "$refs"
   done < <(yq -r '.glossary[]? | [.term, .definition] | @tsv' "$RESEARCH" 2>/dev/null || true)
 fi
 
@@ -66,7 +106,8 @@ if [ -f "$SPINE" ]; then
   spine_fm=$(awk '/^---/{c++; next} c==1' "$SPINE")
   while IFS=$'\t' read -r term def; do
     [ -z "$term" ] && continue
-    add_term "$term" "$def" "spine"
+    refs=$(extract_spine_refs "$spine_fm" "$term")
+    add_term "$term" "$def" "spine" "$refs"
   done < <(printf '%s' "$spine_fm" | yq -r '.glossary_seed[]? | [.term, .definition] | @tsv' - 2>/dev/null || true)
 fi
 
@@ -77,7 +118,8 @@ if [ -d "$MODULES_DIR" ]; then
     slug=$(basename "$(dirname "$nt")")
     while IFS=$'\t' read -r term def; do
       [ -z "$term" ] && continue
-      add_term "$term" "$def" "$slug"
+      refs=$(extract_new_terms_refs "$nt" "$term")
+      add_term "$term" "$def" "$slug" "$refs"
     done < <(yq -r '.[]? | [.term, .definition] | @tsv' "$nt" 2>/dev/null || true)
   done
 fi
@@ -93,7 +135,12 @@ write_glossary() {
   {
     printf -- '---\ntitle: "Glossary"\ndraft: false\n---\n\n'
     jq -r 'to_entries | sort_by(.key) | .[] |
-      "## \(.key)\n\n\(.value.definition)\n"' <<< "$db"
+      "## \(.key)\n\n\(.value.definition)\n" +
+      ( if (.value.references // []) | length > 0
+        then "\n**Learn more:**\n\n" +
+             ((.value.references | map("- [\(.label)](\(.url))")) | join("\n")) + "\n"
+        else ""
+        end )' <<< "$db"
   } > "$out"
 }
 
@@ -107,6 +154,11 @@ conflicts=$(jq -c '[to_entries[] | select(.value.alternates | length > 0) |
   {term: .key, definitions: ([{def: .value.definition, source: .value.source}]
                               + .value.alternates)}]' <<< "$db")
 
+# Terms with zero references — every glossary entry must carry at
+# least one external "Learn more" link. Reviewer flags these.
+missing_refs=$(jq -c '[to_entries[] | select((.value.references // []) | length == 0) |
+  {term: .key, source: .value.source}]' <<< "$db")
+
 count=$(jq 'length' <<< "$db")
-jq -nc --argjson c "$conflicts" --argjson n "$count" \
-  '{ok: true, term_count: $n, conflicts: $c}'
+jq -nc --argjson c "$conflicts" --argjson m "$missing_refs" --argjson n "$count" \
+  '{ok: true, term_count: $n, conflicts: $c, missing_references: $m}'

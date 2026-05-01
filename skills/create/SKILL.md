@@ -44,7 +44,7 @@ Orchestrate a TMB v0.4 curriculum build. You do not write module content yoursel
 ### Phase 0: Preflight
 
 ```bash
-bash scripts/check-deps.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
 The script tells the user what's missing and offers (macOS+brew) or prints (Linux) install commands. If it exits non-zero, propagate its output verbatim and stop. Do not freelance dep installs.
@@ -60,7 +60,7 @@ After Step 8, summarize back ("Here's what I'm building: ..."). Wait for confirm
 Derive a kebab-case slug from the Step 1 goal + topic. Compute `target = <cwd>/<slug>/`. Tell the user the path. Wait for confirmation or a different parent.
 
 ```bash
-bash scripts/detect-curriculum.sh "<target>"
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-curriculum.sh "<target>"
 ```
 
 **If `state == "fresh"`:** `mkdir -p "<target>"` and continue.
@@ -84,7 +84,7 @@ Tell the user: "Quick confirmation: Designed <count> modules — <titles>. Runni
 ### Phase 5: Scaffold the Hugo site
 
 ```bash
-bash scripts/scaffold-site.sh \
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/scaffold-site.sh \
   --target "<target>" \
   --title "<from interview>" \
   --description "<one-sentence>" \
@@ -102,7 +102,7 @@ Stop on failure. Don't dispatch builders against a broken scaffold.
 ```bash
 for brief in "<target>/briefs"/*.yaml; do
   slug=$(basename "$brief" .yaml)
-  bash scripts/new-module.sh "<target>" "$slug"
+  bash ${CLAUDE_PLUGIN_ROOT}/scripts/new-module.sh "<target>" "$slug"
 done
 ```
 
