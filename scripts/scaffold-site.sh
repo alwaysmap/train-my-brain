@@ -227,7 +227,10 @@ cat > "$TARGET/site/layouts/baseof.html" <<'EOF'
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap">
     {{ end }}
-    {{ $siteCss := resources.Get "css/site.css" | fingerprint }}
+    {{/* No fingerprint — keep the URL stable as /css/site.css. Going through
+         resources.Get (vs static/) leaves room for future Hugo Pipes processing
+         (minification, SCSS) without changing the URL contract. */}}
+    {{ $siteCss := resources.Get "css/site.css" }}
     <link rel="stylesheet" href="{{ $siteCss.RelPermalink }}" />
   </head>
   <body>

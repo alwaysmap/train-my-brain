@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.4.11 — 2026-04-30
+## 0.4.12 — 2026-04-30
+
+### Fixed
+
+- **CSS is no longer fingerprinted.** v0.4.0 piped `resources.Get "css/site.css" | fingerprint` so the URL was `/css/site.<sha>.css`. That meant every CSS edit forced a hard browser refresh and orphaned the previous fingerprinted file in `public/css/` until a clean rebuild. Now `baseof.html` skips `| fingerprint` so the URL is always `/css/site.css` — predictable, cacheable on a normal soft refresh.
+
+  Stays in `assets/` (going through `resources.Get`) so future Hugo Pipes processing — minification, SCSS, PostCSS — can layer on without changing the URL contract. The "fingerprint for cache-busting in production" pattern can come back if the site is ever deployed to a setup with hot-reload-unfriendly CDN caching, but the local dev case shouldn't pay for that.
+
+  Existing curricula pick up via `/tmb:rebuild-site`.
 
 ### Changed
 
