@@ -435,18 +435,21 @@ cat > "$TARGET/site/assets/css/site.css" <<'EOF'
   --hue-triadic:        calc(var(--hue) + 120);
 
   /* ── Light-mode palette ── */
-  --color-bg:           hsla(var(--hue), 25%, 99%, 1);   /* off-white with hue tint */
-  --color-surface:      hsla(var(--hue), 30%, 96%, 1);   /* sidebar, code, table headers */
-  --color-text:         hsla(var(--hue),  8%, 12%, 1);   /* near-black */
-  --color-muted:        hsla(var(--hue),  5%, 40%, 1);
-  --color-border:       hsla(var(--hue), 15%, 88%, 1);
+  /* Saturation pushed up so the chosen hue actually reads at a glance —
+   * even at low-chroma hue choices like yellow-gold (55) or olive (80). */
+  --color-bg:           hsla(var(--hue), 25%, 99%, 1);
+  --color-surface:      hsla(var(--hue), 35%, 96%, 1);
+  --color-text:         hsla(var(--hue), 12%, 11%, 1);
+  --color-muted:        hsla(var(--hue), 10%, 36%, 1);
+  --color-border:       hsla(var(--hue), 25%, 86%, 1);
 
-  --color-primary:       hsla(var(--hue),           65%, 38%, 1);
-  --color-primary-soft:  hsla(var(--hue),           65%, 94%, 1);
-  --color-primary-fade:  hsla(var(--hue),           50%, 98%, 1);
-  --color-analogous:     hsla(var(--hue-analogous), 70%, 42%, 1);
-  --color-triadic:       hsla(var(--hue-triadic),   55%, 38%, 1);
-  --color-triadic-soft:  hsla(var(--hue-triadic),   55%, 94%, 1);
+  --color-primary:        hsla(var(--hue),           75%, 35%, 1);
+  --color-primary-strong: hsla(var(--hue),           80%, 28%, 1);
+  --color-primary-soft:   hsla(var(--hue),           70%, 92%, 1);
+  --color-primary-fade:   hsla(var(--hue),           60%, 97%, 1);
+  --color-analogous:      hsla(var(--hue-analogous), 75%, 40%, 1);
+  --color-triadic:        hsla(var(--hue-triadic),   60%, 36%, 1);
+  --color-triadic-soft:   hsla(var(--hue-triadic),   60%, 92%, 1);
 
   /* ── Layout ── */
   --max-width: 720px;
@@ -473,18 +476,19 @@ html[data-font-preset="book"] {
 /* ── Dark mode (auto via prefers-color-scheme) ── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg:           hsla(var(--hue), 18%,  9%, 1);   /* deep, hue-tinted */
-    --color-surface:      hsla(var(--hue), 16%, 14%, 1);
+    --color-bg:           hsla(var(--hue), 22%,  9%, 1);
+    --color-surface:      hsla(var(--hue), 18%, 15%, 1);
     --color-text:         hsla(var(--hue),  8%, 92%, 1);
-    --color-muted:        hsla(var(--hue),  6%, 65%, 1);
-    --color-border:       hsla(var(--hue), 12%, 22%, 1);
+    --color-muted:        hsla(var(--hue), 10%, 65%, 1);
+    --color-border:       hsla(var(--hue), 16%, 24%, 1);
 
-    --color-primary:       hsla(var(--hue),           70%, 70%, 1);
-    --color-primary-soft:  hsla(var(--hue),           40%, 22%, 1);
-    --color-primary-fade:  hsla(var(--hue),           35%, 14%, 1);
-    --color-analogous:     hsla(var(--hue-analogous), 70%, 72%, 1);
-    --color-triadic:       hsla(var(--hue-triadic),   55%, 70%, 1);
-    --color-triadic-soft:  hsla(var(--hue-triadic),   30%, 22%, 1);
+    --color-primary:        hsla(var(--hue),           75%, 72%, 1);
+    --color-primary-strong: hsla(var(--hue),           80%, 80%, 1);
+    --color-primary-soft:   hsla(var(--hue),           45%, 22%, 1);
+    --color-primary-fade:   hsla(var(--hue),           40%, 14%, 1);
+    --color-analogous:      hsla(var(--hue-analogous), 75%, 74%, 1);
+    --color-triadic:        hsla(var(--hue-triadic),   60%, 72%, 1);
+    --color-triadic-soft:   hsla(var(--hue-triadic),   35%, 22%, 1);
   }
 }
 
@@ -559,7 +563,7 @@ main { max-width: var(--max-width); }
   top: 1rem;
   font-size: 0.92em;
 }
-.sidebar h3 { margin: 0 0 0.5rem; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-muted); }
+.sidebar h3 { margin: 0 0 0.5rem; padding: 0; border: 0; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--color-primary); }
 .sidebar h3 a { color: inherit; text-decoration: none; }
 .sidebar h3 a:hover { color: var(--color-primary); }
 .sidebar ol.sidebar-modules { list-style: decimal inside; padding: 0; margin: 0; }
@@ -573,8 +577,25 @@ main { max-width: var(--max-width); }
 .sidebar ul.sidebar-children a:hover { color: var(--color-primary); }
 
 /* Typography */
-h1, h2, h3 { font-family: var(--font-ui); line-height: 1.25; }
-h1 { color: var(--color-primary); }
+h1, h2, h3, h4 { font-family: var(--font-ui); line-height: 1.25; }
+h1 {
+  color: var(--color-primary);
+  font-size: 2.1rem;
+  margin: 1.5rem 0 1rem;
+}
+h2 {
+  color: var(--color-primary-strong);
+  font-size: 1.45rem;
+  margin: 2rem 0 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--color-primary-soft);
+}
+h3 {
+  color: var(--color-primary-strong);
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0.5rem;
+}
+h4 { color: var(--color-text); font-size: 1rem; margin: 1rem 0 0.4rem; }
 a { color: var(--color-primary); }
 a.gloss { border-bottom: 1px dotted var(--color-primary); text-decoration: none; }
 a.gloss:hover { border-bottom-style: solid; }
@@ -640,9 +661,25 @@ th { background: var(--color-primary-soft); font-family: var(--font-ui); }
 }
 
 /* Module concept page */
-.module-header { border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
-.module-number { font-family: var(--font-ui); color: var(--color-muted); font-size: 0.9em; }
-.driving-question { color: var(--color-triadic); font-size: 1.05em; padding: 0.75rem 1rem; background: var(--color-triadic-soft); border-left: 4px solid var(--color-triadic); margin: 1rem 0; }
+.module-header { border-bottom: 2px solid var(--color-primary-soft); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.module-header h1 { border: 0; padding-bottom: 0; margin: 0.25rem 0 0.5rem; }
+.module-number {
+  font-family: var(--font-ui);
+  color: var(--color-primary);
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.driving-question {
+  color: var(--color-triadic);
+  font-size: 1.05em;
+  padding: 1rem 1.25rem;
+  background: var(--color-triadic-soft);
+  border-left: 4px solid var(--color-triadic);
+  border-radius: 0 6px 6px 0;
+  margin: 1rem 0;
+}
 .module-body { /* prose styles inherit */ }
 
 /* Practice section */

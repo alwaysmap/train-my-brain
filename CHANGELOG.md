@@ -1,6 +1,19 @@
 # Changelog
 
-## 0.4.10 — 2026-04-30
+## 0.4.11 — 2026-04-30
+
+### Changed
+
+- **Primary color now appears throughout the page, not just on h1.** v0.4.4–0.4.10 colored only `h1` and `<a>` with `--color-primary`; everything else inherited `--color-text` (near-black). For low-chroma hue choices like yellow-gold (55) or olive (80), this made the page read as monochrome below the fold. Now:
+  - **h2** uses `--color-primary-strong` with a soft `--color-primary-soft` border-bottom — every section break carries a tint.
+  - **h3** uses `--color-primary-strong`.
+  - **`.module-number`** ("MODULE 5") uses `--color-primary` in uppercase letterspaced caps.
+  - **Sidebar `<h3>` "ALL MODULES"** uses `--color-primary` (was muted).
+  - **`.module-header`** border-bottom is now `2px var(--color-primary-soft)` (was 1px border-color).
+- **Saturation pushed up across the palette** so any chosen hue actually reads. Light mode primary went from `s=65% l=38%` to `s=75% l=35%`; muted from `s=5%` to `s=10%`; border from `s=15%` to `s=25%`. Dark mode mirrored. New `--color-primary-strong` token (`s=80% l=28%` light / `s=80% l=80%` dark) for headings that need to read clearly against the body.
+- **New token `--color-primary-strong`** for darker / more-saturated primary use cases (h2, h3).
+
+  Existing curricula pick up via `/tmb:rebuild-site`.
 
 ### Fixed
 
