@@ -79,7 +79,7 @@ Summarize: "Researched <topic>: <N> glossary entries, <M> sources, <K> contrasts
 
 Dispatch `tmb-designer` with `mode="new"`. The designer reads `research.yaml`, writes `curriculum_spine.md` and `briefs/*.yaml`, then runs `validate-briefs.sh`. On gate failure, propagate the JSON gaps verbatim and abort.
 
-Tell the user: "Designed <count> modules: <titles>. Running example: <name>. Continue? [Y/n]". Wait.
+Tell the user: "Quick confirmation: Designed <count> modules — <titles>. Running example: <name>." then call `AskUserQuestion` with the design-approval picker described in the standing rules below. Wait.
 
 ### Phase 5: Scaffold the Hugo site
 
@@ -164,57 +164,73 @@ Phases 0–2 don't need numbered announcements — the user is actively in conve
 
 For agent dispatch (Phases 3, 4, 7, 8): also include an estimated duration if you have one.
 
-### Confirmations are multiple-choice, not yes/no
+### Confirmations use the AskUserQuestion picker, not numbered prose
 
-Every confirmation gate outside the 8-step interview (target-directory confirmation, design approval, resume offer, dep install offer, open-question resolution from the researcher) is presented as a **numbered multiple-choice prompt**, not as "Is that ok?" with free-text yes/no. The user types a single digit; you act on it.
+Every confirmation gate outside the 8-step interview (target-directory confirmation, design approval, resume offer, dep install offer, open-question resolution from the researcher) is presented via the `AskUserQuestion` tool — a TUI select widget the user navigates with the keyboard — **not** as a numbered list in prose, and **not** as "Is that ok?" with free-text yes/no. The picker is the entire gate.
 
-Standard format:
+Standard pattern:
 
-```
-Quick confirmation: <state of the world in one line>.
-  1) Proceed
-  2) Suggest changes
-  3) Cancel
-```
+1. Print a one-line state-of-the-world preface as a normal message, prefixed with `Quick confirmation:` so the user recognizes the gate.
+2. Immediately call `AskUserQuestion` with 2–4 options describing the available paths. The "Other" option is appended automatically — never include one yourself.
 
-Pick the options that fit the gate. Examples:
+Examples:
 
-```
-Quick confirmation: I'll create the curriculum at <target>.
-  1) Proceed
-  2) Use a different parent directory
-  3) Cancel
-```
+**Target directory:**
+
+> Quick confirmation: I'll create the curriculum at `<target>`.
 
 ```
-Quick confirmation: Designed 6 modules — Lifecycle, Data, Post-training, Evals,
-Safety, Productization. Running example: Claude Legal Advisor.
-  1) Proceed to scaffold
-  2) Suggest changes (which module to revise, drop, or add?)
-  3) Cancel
+question: "Use this folder for the curriculum?"
+header:   "Target folder"
+multiSelect: false
+options:
+  - label: "Proceed"
+    description: "Create the curriculum at <target>."
+  - label: "Use a different parent directory"
+    description: "Tell me where to put it instead."
+  - label: "Cancel"
+    description: "Stop without creating anything."
 ```
 
+**Design approval:**
+
+> Quick confirmation: Designed 6 modules — Lifecycle, Data, Post-training, Evals, Safety, Productization. Running example: Claude Legal Advisor.
+
 ```
-Quick confirmation: Found an in-progress v0.4 curriculum at <target> with 3
-modules missing.
-  1) Resume — re-run only the missing builders
-  2) Start fresh — abort and rename the existing folder
+question: "Continue to scaffold with this module list?"
+header:   "Approve design"
+multiSelect: false
+options:
+  - label: "Proceed to scaffold"
+    description: "Build the Hugo site and dispatch module-builders."
+  - label: "Suggest changes"
+    description: "Tell me which module to revise, drop, or add."
+  - label: "Cancel"
+    description: "Stop without scaffolding."
+```
+
+**Resume offer:**
+
+> Quick confirmation: Found an in-progress v0.4 curriculum at `<target>` with 3 modules missing.
+
+```
+question: "Resume or start fresh?"
+header:   "Resume"
+multiSelect: false
+options:
+  - label: "Resume"
+    description: "Re-run only the missing builders against the existing scaffold."
+  - label: "Start fresh"
+    description: "Abort and rename the existing folder so we begin clean."
 ```
 
 Rules:
 
-- Always lead with `Quick confirmation:` so the user knows it's a gate, not a substantive question.
-- One numbered option per line.
-- 2–4 options. Two is fine when the choice is binary (proceed vs cancel). Three when there's a "modify" path.
-- Wait for a digit. If the user types something else, restate the options.
-- "Suggest changes" means *the user types what to change in plain prose* — you treat it as an open turn, then return to the same gate after applying the change.
-
-The 8-step interview itself uses its own elicitation pattern (`references/elicitation.md`) — that's a different pattern with reflection pauses. Multiple-choice applies only to confirmation gates between phases.
-
-Examples:
-
-- `Quick confirmation: I'll create the curriculum at <target>. Use that, or pick a different parent? [Enter to accept]`
-- `Quick confirmation: Designed 6 modules: <titles>. Running example: <name>. Continue to scaffold? [Y/n]`
+- Always lead with a `Quick confirmation:` preface as a normal message so the user knows it's a gate, not a substantive question.
+- 2–4 options per `AskUserQuestion` call. Two is fine when the choice is binary (proceed vs cancel). Three when there's a "modify" path.
+- "Suggest changes" / "Use a different parent directory" / similar modify paths mean *the user's next message is plain prose describing the change* — treat it as an open turn, apply the change, then re-call the same `AskUserQuestion` widget.
+- Never substitute a numbered list in prose for the picker, even for two-option gates. The picker keeps confirmation a one-keystroke act.
+- The 8-step interview itself also uses `AskUserQuestion` per `references/elicitation.md` — but with its own reflection-pause discipline. The standing rule here covers gates *between* phases.
 
 ### Other rules
 

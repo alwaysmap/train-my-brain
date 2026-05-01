@@ -1,8 +1,21 @@
 # Elicitation: Interview Guide
 
+## The picker tool
+
+Every multiple-choice prompt in this interview — including the preamble, the menu-style steps (2, 4, 5, 8), the reflection confirmation after every step, and the post-Step-8 summary — **must** be presented with the `AskUserQuestion` tool, not as a numbered list in plain prose. The tool renders an interactive TUI select widget the user navigates with the keyboard (↑/↓ to move, space to toggle in multi-select, Enter to submit). Plain "reply with the numbers" lists are forbidden in this flow — they read as a form, not a conversation, and the user can't unselect once they've typed.
+
+Tool constraints to design around:
+
+- **2–4 options per question.** Keep menus tight. If a step naturally has 5+ options, consolidate adjacent ones.
+- **An "Other" option is appended automatically** — never include one yourself. If a user might want a path your 4 options don't cover, mention "Other" in the question text so they know it's available.
+- **`multiSelect: true`** for steps 2 and 5; **`multiSelect: false`** everywhere else.
+- **Up to 4 questions** can be batched in a single `AskUserQuestion` call. The interview asks one at a time anyway — never batch interview steps.
+
+Free-text steps (1, 3, 6) remain free-text — the *answer* is a sentence the user types. But the **reflection confirmation** at the end of every step (free-text or menu) uses `AskUserQuestion` with two options so the user can confirm or push back without typing.
+
 ## How to run the interview
 
-The interview has exactly **8 steps**. Before asking step 1, tell the user the full shape of the conversation so they know what they signed up for:
+The interview has exactly **8 steps**. Before asking step 1, tell the user the full shape of the conversation so they know what they signed up for, then close with an `AskUserQuestion` widget:
 
 > "Here's how the next ~10 minutes will go:
 >
@@ -12,37 +25,62 @@ The interview has exactly **8 steps**. Before asking step 1, tell the user the f
 >
 >   **Phase 3 — Autonomous work (~6–10 minutes, no input from you).** I research the topic, design the modules, scaffold the Hugo site, build each module in parallel, run a consistency reviewer, and start the local server.
 >
->   You can interrupt at any point. Ready to start?
->     1) Yes — start the interview
->     2) Wait — I have a question first"
+>   You can interrupt at any point."
 
-Wait for the user to pick 1 before asking Step 1. Do not start the interview against a user who hasn't acknowledged this preamble — they'll lose the mental model of when the conversational part ends and the autonomous part begins.
+Then call `AskUserQuestion`:
+
+```
+question: "Ready to start?"
+header:   "Start interview"
+options:
+  - label: "Yes — start the interview"
+    description: "Begin Step 1 of 8."
+  - label: "Wait — I have a question first"
+    description: "Pause here so you can ask before we begin."
+multiSelect: false
+```
+
+Wait for "Yes" before asking Step 1. Do not start the interview against a user who hasn't acknowledged this preamble — they'll lose the mental model of when the conversational part ends and the autonomous part begins.
 
 Then for every step — **two exchanges, not one:**
 
 **Exchange A — the question:**
 1. Show the step number and total: **"Step N of 8"**
-2. Ask the question (use `ask_user_input` for multiple choice)
-3. Wait for the answer
+2. Ask the question:
+   - For free-text steps (1, 3, 6): ask in a normal message and wait for the user's typed answer.
+   - For menu steps (2, 4, 5, 8): call `AskUserQuestion` with the options listed below.
+3. Wait for the answer.
 
-**Exchange B — the reflection (a separate message, nothing else in it):**
+**Exchange B — the reflection + confirmation (a separate message):**
 4. Reflect back what you heard in your own words — not a paraphrase, but a
-   restatement of what it *means* for the curriculum
-5. End the message there. Do NOT ask the next question in the same message.
-6. Wait for genuine confirmation: "yes", "exactly", "that's right", or a correction
-7. Only after confirmation, move to the next step
+   restatement of what it *means* for the curriculum.
+5. In the same tool turn, call `AskUserQuestion` with this two-option widget so the user confirms without typing:
+
+   ```
+   question: "Does that match?"
+   header:   "Confirm"
+   options:
+     - label: "Yes — that matches"
+       description: "Proceed to the next step."
+     - label: "Not quite — let me adjust"
+       description: "Tell me what to change."
+   multiSelect: false
+   ```
+6. Do NOT include the next step's question in the same message as the reflection.
+7. If the user picks "Yes", move to the next step. If they pick "Not quite" (or use Other to elaborate), treat their next message as a clarification, update the reflection, and ask the same confirmation widget again. Only proceed once they've picked "Yes".
 
 **Why this matters:** Asking "Does that sound right?" and then immediately asking
 Step N+1 in the same message is performative. The user can't actually correct you
 without interrupting a question that's already been asked. The reflection must be
-a real pause — two separate exchanges per step, every time.
+a real pause — two separate exchanges per step, every time. The select widget
+makes confirmation a one-keystroke act, which is the point.
 
 If their answer is vague, say what you'd assume and ask if that's right rather than
 asking them to clarify in the abstract. "I'd treat that as [interpretation] — is that
-about right?" is better than "Could you be more specific?"
+about right?" — followed by the same Yes / Not quite picker — beats "Could you be more specific?"
 
-Use the `ask_user_input` tool for multiple-choice questions. Keep the tone conversational —
-this should feel like a good first meeting with a mentor, not a form.
+Keep the tone conversational — this should feel like a good first meeting with a
+mentor, not a form. The picker is the form layer; your prose is the conversation.
 
 ---
 
@@ -91,16 +129,25 @@ this should feel like a good first meeting with a mentor, not a form.
 
 ## Step 2 of 8: How they'll be tested
 
-**Ask (use ask_user_input, multi-select):**
-> "How do you expect to actually be tested on this? Pick everything that applies."
+**Ask (call `AskUserQuestion`, `multiSelect: true`):**
+> "How do you expect to actually be tested on this? Pick everything that applies — pick Other if there's no external test and you just want to feel confident."
 
-Options:
-- Job interview (technical questions, whiteboard problems)
-- Customer or stakeholder conversation
-- Code review or pair programming session
-- Certification exam
-- Writing (blog posts, documentation, proposals)
-- No external test — I just want to feel confident
+```
+question: "How do you expect to be tested? Pick everything that applies."
+header:   "Tested via"
+multiSelect: true
+options:
+  - label: "Job interview or certification exam"
+    description: "Technical questions, whiteboard problems, or a structured exam — practiced answers and exam-objective coverage matter."
+  - label: "Customer or stakeholder conversation"
+    description: "Explaining trade-offs to people who aren't deep in the weeds — jargon-free explanations matter."
+  - label: "Code review or pair programming"
+    description: "Walking through real, runnable output with a peer — exercises produce working artifacts."
+  - label: "Writing (blog post, docs, proposal)"
+    description: "Producing written explanations for an audience — every module ships a 'what to write' prompt."
+```
+
+If the user picks **Other**, treat free-text like "no external test" / "just confidence" / "for myself" as the confidence-only path described below.
 
 **Reflect back examples:**
 
@@ -119,12 +166,11 @@ Options:
 
 **Interpret for curriculum design:**
 
-- Interview → Every VALIDATION.md needs a practiced answer with "good answer covers."
-- Customer conversation → Exercises include "explain this without jargon" moments.
-- Code review → Every exercise produces runnable output. Validation includes "walk me through this."
-- Certification → Add practice questions mapped to exam objectives.
+- Job interview / certification exam → Every VALIDATION.md needs a practiced answer with "good answer covers." If the user mentions "certification" specifically (in the label or in Other free-text), also map to exam objectives with practice questions per domain.
+- Customer or stakeholder conversation → Exercises include "explain this without jargon" moments.
+- Code review or pair programming → Every exercise produces runnable output. Validation includes "walk me through this."
 - Writing → "What to write on your blog" section required in every README.
-- Just confidence → Reduce oral weight, increase hands-on and reflection weight.
+- Other → "no external test" / "just confidence" → Reduce oral weight, increase hands-on and reflection weight.
 
 ---
 
@@ -162,14 +208,21 @@ Options:
 
 ## Step 4 of 8: Depth vs. breadth
 
-**Ask (use ask_user_input, single-select):**
-> "For this goal, is it more important to know a lot of things at a surface level,
-> or to know fewer things really well?"
+**Ask (call `AskUserQuestion`, `multiSelect: false`):**
+> "For this goal, is it more important to know a lot of things at a surface level, or to know fewer things really well?"
 
-Options:
-- **Wide map** — I want to understand the whole landscape, know what exists and roughly why
-- **Deep dives** — I want to master specific things well enough to build with them or defend them
-- **Somewhere in the middle** — Broad enough to have a conversation, deep enough not to get caught out
+```
+question: "Is it more important to know a lot of things, or fewer things really well?"
+header:   "Depth vs breadth"
+multiSelect: false
+options:
+  - label: "Wide map"
+    description: "Understand the whole landscape — what exists and roughly why — over expertise on any one piece."
+  - label: "Deep dives"
+    description: "Master a smaller set well enough to build with them or defend them. Fewer modules, each going further."
+  - label: "Somewhere in the middle"
+    description: "Broad enough to hold a conversation, deep enough not to get caught out."
+```
 
 **Reflect back — then STOP:**
 
@@ -193,21 +246,31 @@ or `aware-of`. Calibrate the ratio based on this answer.
 
 ## Step 5 of 8: Validation preference
 
-**Ask (use ask_user_input, multi-select):**
-> "When you finish a module, how do you want to check that it actually stuck?"
+**Ask (call `AskUserQuestion`, `multiSelect: true`):**
+> "When you finish a module, how do you want to check that it actually stuck? Pick everything that applies — picking all four means every module gets the full validation suite."
 
-Options:
-- Answer questions out loud without looking at notes
-- Complete an exercise that produces something real
-- Write a short blog post or explanation for someone else
-- Walk through a key question or scenario
-- All of the above — I want every module to feel solid
+```
+question: "How do you want to validate each module? Pick everything that applies."
+header:   "Validation"
+multiSelect: true
+options:
+  - label: "Answer questions out loud without looking at notes"
+    description: "Oral recall — say it back from memory, no peeking."
+  - label: "Complete an exercise that produces something real"
+    description: "Hands-on output — runnable code, a written artifact, a working thing."
+  - label: "Write a short blog post or explanation for someone else"
+    description: "Teach-back — produce a paragraph or post explaining the concept."
+  - label: "Walk through a key question or scenario"
+    description: "Scenario reasoning — talk through how you'd respond to a real situation."
+```
+
+(Picking all four = the "every module feels solid" full-suite path. No separate "all of the above" option — the picker handles that natively.)
 
 **Reflect back — then STOP:**
 
 - "Questions + exercise" → "Bar for 'done': explain it out loud and show real work."
   [STOP]
-- "All of the above" → "Full validation suite. Takes more time per module but
+- All four picked → "Full validation suite. Takes more time per module but
   the knowledge sticks better."
   [STOP]
 
@@ -266,24 +329,24 @@ Store the hue number. Use it in `site/hugo.yaml` as `params.hue`.
 
 This is the only step where the question sounds whimsical. Don't skip the rationale — typography is load-bearing for a curriculum site (the user reads it for hours, not minutes), and the answer drives a real CSS decision the user can't easily reverse later.
 
-**Ask (use the `ask_user_input` tool, single-select — render as a menu, not as free text):**
+**Ask (call `AskUserQuestion`, `multiSelect: false` — the menu IS the picker, not free text):**
 
-Open with the why, then the menu. Suggested phrasing:
+Open with the why, then immediately call `AskUserQuestion`. Suggested phrasing:
 
 > "Last one, and it's a fun one — but it matters more than it sounds.
 >
-> You're going to read this curriculum for hours, not minutes. The typeface decides whether you settle in or fight the page. There are two genuinely different reading patterns to choose between:
->
->   1) **Public signage feel** — humanist sans-serif, like good wayfinding or modern technical docs. Quick scanning, tight UI, app-like. Best when you'll dip in and out of modules.
->
->   2) **Printed book feel** — classical serif with generous leading, like a long-form essay or chapter. Best when you'll sit down and read straight through.
->
-> Both render in light mode, dark mode, and high-contrast mode automatically based on your OS — so this isn't about appearance overrides, it's about the *reading rhythm*. Which one matches how you actually want to read this?"
+> You're going to read this curriculum for hours, not minutes. The typeface decides whether you settle in or fight the page. There are two genuinely different reading patterns to choose between — both render correctly in light mode, dark mode, and high-contrast mode based on your OS, so this isn't about appearance, it's about *reading rhythm*."
 
-The `ask_user_input` tool call itself uses these two options:
-
-- `Public signage` — humanist sans (Inter / system-ui). Tight UI feel, scan-friendly.
-- `Printed books` — classical serif (Source Serif 4 / Charter / Georgia). Reading-room feel, sit-down-and-read.
+```
+question: "Which reading rhythm matches how you actually want to read this?"
+header:   "Typography"
+multiSelect: false
+options:
+  - label: "Public signage feel"
+    description: "Humanist sans-serif (Inter / system-ui). Like good wayfinding or modern technical docs — quick scanning, tight UI, app-like. Best when you'll dip in and out of modules."
+  - label: "Printed book feel"
+    description: "Classical serif (Source Serif 4 / Charter / Georgia). Like a long-form essay — wider leading, more breathing room, no scanning. Best when you'll sit down and read straight through."
+```
 
 **Reflect back — then STOP:**
 
@@ -307,6 +370,8 @@ Both presets respect `prefers-color-scheme: dark` and `prefers-contrast: more` a
 
 **Summary:**
 
+Print the recap as a normal message (no picker for the recap text), then call `AskUserQuestion`:
+
 > "Here's what I'm building:
 >
 > **Goal:** [one sentence]
@@ -316,13 +381,22 @@ Both presets respect `prefers-color-scheme: dark` and `prefers-contrast: more` a
 > **Validation:** [from Step 5]
 > **Timeline + tools:** [from Step 6]
 > **Site theme:** [color] → hue [N]°
-> **Typography:** [signage / books]
->
->   1) Looks right — proceed
->   2) Suggest changes (which line is off?)
->   3) Cancel"
+> **Typography:** [signage / books]"
 
-Wait for confirmation. Then ask folder location:
+```
+question: "Does this match what you want to build?"
+header:   "Confirm summary"
+multiSelect: false
+options:
+  - label: "Looks right — proceed"
+    description: "Move on to picking the folder location."
+  - label: "Suggest changes"
+    description: "Tell me which line is off and I'll revise."
+  - label: "Cancel"
+    description: "Stop here without building anything."
+```
+
+If "Suggest changes" is picked, treat the user's next message as the correction, update the summary, then re-call `AskUserQuestion` with the same widget. Only proceed once "Looks right" is picked. Then ask folder location:
 
 > "One last thing — where on your computer would you like to save this?
 > I'll create a folder there."
@@ -348,3 +422,5 @@ most important rule in this document. Two exchanges per step. Every time.
 
 **Don't use technical vocabulary for non-technical users.** "Folder" not "repo."
 "Website" not "Hugo site." "Save the files" not "commit."
+
+**Don't render menu choices as numbered prose.** Every multi-option prompt — preamble, menu steps, reflection confirmations, post-Step-8 summary — uses `AskUserQuestion`. Writing "1) Option A / 2) Option B — reply with the number" defeats the keyboard-driven select widget the user expects.

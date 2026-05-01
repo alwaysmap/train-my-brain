@@ -26,12 +26,23 @@ Continue to Phase 3 (research).
 
 ### `v0.4-partial`
 
-A previous `/tmb:create` was interrupted between scaffold and reviewer. Offer resume:
+A previous `/tmb:create` was interrupted between scaffold and reviewer. Offer resume — print a one-line preface, then call `AskUserQuestion`:
 
-> *"Found an in-progress v0.4 curriculum at `<target>` with `<missing_pages.length>` modules missing (`<missing_pages joined>`). Resume by re-running only the missing module-builders? [y/N]"*
+> *"Quick confirmation: Found an in-progress v0.4 curriculum at `<target>` with `<missing_pages.length>` modules missing (`<missing_pages joined>`)."*
 
-- Yes → carry `missing_pages` forward; skip Phase 3 (research already done) and Phase 4 (design already done) and Phase 5 (scaffold already done). Jump to Phase 6, calling `new-module.sh` only for the missing slugs (the script refuses to clobber, so it's safe to call against existing modules — they'll be no-ops).
-- No → abort: *"OK — move or delete `<target>` and re-run /tmb:create when ready."*
+```
+question: "Resume the existing build, or stop here?"
+header:   "Resume"
+multiSelect: false
+options:
+  - label: "Resume"
+    description: "Re-run only the missing module-builders against the existing scaffold."
+  - label: "Stop here"
+    description: "Don't touch the folder — I'll move or rename it and re-run /tmb:create."
+```
+
+- Resume → carry `missing_pages` forward; skip Phase 3 (research already done) and Phase 4 (design already done) and Phase 5 (scaffold already done). Jump to Phase 6, calling `new-module.sh` only for the missing slugs (the script refuses to clobber, so it's safe to call against existing modules — they'll be no-ops).
+- Stop here → abort: *"OK — move or delete `<target>` and re-run /tmb:create when ready."*
 
 ### `v0.4-complete`
 

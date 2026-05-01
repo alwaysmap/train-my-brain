@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.16 — 2026-05-01
+
+### Changed
+
+- **Multiple-choice prompts now use the native `AskUserQuestion` picker.** Previously the interview and confirmation gates were rendered as numbered prose ("1) Job interview / 2) Customer conversation / ... — reply with the numbers"), which read as a form and didn't let the user unselect once they'd typed. The 8-step interview (steps 2, 4, 5, 8), the preamble, the post-Step-8 summary, the reflection confirmation after every step, and every confirmation gate in `/tmb:create` now call `AskUserQuestion` — Claude Code's TUI select widget with keyboard navigation (↑/↓, space to toggle in multi-select, Enter to submit, automatic "Other" option for free-text escape).
+
+  Constraints of the tool drove two menu changes:
+
+  - **Step 2 ("How will you be tested?")** consolidated from 6 options to 4 (`AskUserQuestion` caps at 4): "Job interview or certification exam", "Customer or stakeholder conversation", "Code review or pair programming", "Writing (blog post, docs, proposal)". The "no external test" path moves to "Other" — pickable via the auto-appended Other option, with a one-line note in the question text so users see it.
+  - **Step 5 ("Validation preference")** dropped the redundant "All of the above" — multi-select makes it equivalent to picking all four.
+
+  The reflection-confirmation pause after each interview step now uses a two-option picker ("Yes — that matches" / "Not quite — let me adjust") instead of the previous free-text "Does that sound right?" prompt. Same discipline (still a separate exchange from the next question), just one keystroke to confirm.
+
+  Updated docs: `references/elicitation.md`, `skills/create/SKILL.md` (the "Confirmations are multiple-choice" standing rule is now "Confirmations use the AskUserQuestion picker"), `skills/create/references/curriculum-state.md` (v0.4-partial resume offer).
+
 ## 0.4.15 — 2026-05-01
 
 ### Fixed
