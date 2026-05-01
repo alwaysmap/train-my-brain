@@ -175,6 +175,8 @@ draft: false
 EOF
 
 # Exercise page — one per exercise inside a module's exercises/ section.
+# Every exercise has a sibling `<name>-answer.md` model-answer page; the
+# layout cross-links them automatically.
 cat > "$TARGET/site/archetypes/exercises.md" <<'EOF'
 ---
 title: "{{ replace .File.ContentBaseName "-" " " | title }}"
@@ -184,6 +186,20 @@ draft: false
 ---
 
 <!-- Exercise body (what you'll do, setup, scaffold with [TODO:] markers, verification). -->
+EOF
+
+# Model-answer page — a sibling to each exercise. Filename pattern:
+# `<exercise-slug>-answer.md`. The layout looks it up and renders a
+# "Show model answer →" CTA at the bottom of the exercise page.
+cat > "$TARGET/site/archetypes/answer.md" <<'EOF'
+---
+title: "Model answer"
+type: answer
+date: {{ .Date }}
+draft: false
+---
+
+<!-- Worked solution + commentary on tradeoffs the learner had to make. -->
 EOF
 
 cat > "$TARGET/site/archetypes/glossary.md" <<'EOF'
@@ -315,7 +331,10 @@ cat > "$TARGET/site/layouts/index.html" <<'EOF'
 {{ end }}
 EOF
 
-# Generic single-page layout — used for validation, exercises, glossary.
+# Generic single-page layout — used for validation, exercises, answers, glossary.
+# When the page is an exercise, looks for a sibling `<slug>-answer.md` and
+# renders a "Show model answer" CTA. When the page is an answer, links back
+# to its parent exercise.
 cat > "$TARGET/site/layouts/_default/single.html" <<'EOF'
 {{ define "main" }}
 <article class="single">
@@ -323,7 +342,30 @@ cat > "$TARGET/site/layouts/_default/single.html" <<'EOF'
     <h1>{{ .Title }}</h1>
   </header>
   <div class="single-body">{{ .Content }}</div>
-  {{ if .Parent }}
+
+  {{/* Exercise → "Show model answer" CTA */}}
+  {{ if eq .Type "exercise" }}
+    {{ $base := path.BaseName .File.LogicalName }}
+    {{ $answerName := printf "%s-answer" $base }}
+    {{ with .Parent.GetPage $answerName }}
+    <aside class="model-answer-cta">
+      <p><strong>Tried it?</strong> Compare your work against the worked solution.</p>
+      <a class="model-answer-button" href="{{ .RelPermalink }}">Show model answer &rarr;</a>
+    </aside>
+    {{ end }}
+  {{ end }}
+
+  {{/* Answer → "Back to exercise" link */}}
+  {{ if eq .Type "answer" }}
+    {{ $base := path.BaseName .File.LogicalName }}
+    {{ $exName := strings.TrimSuffix "-answer" $base }}
+    {{ with .Parent.GetPage $exName }}
+    <p class="back-link"><a href="{{ .RelPermalink }}">&larr; Back to the exercise</a></p>
+    {{ end }}
+  {{ end }}
+
+  {{/* Default back-link for everything else */}}
+  {{ if and .Parent (ne .Type "answer") }}
   <p class="back-link"><a href="{{ .Parent.RelPermalink }}">&larr; Back to {{ .Parent.Title }}</a></p>
   {{ end }}
 </article>
@@ -332,13 +374,17 @@ EOF
 
 # Generic section layout — used for /modules/ list, /modules/<slug>/exercises/ list,
 # and any other section that isn't an individual module's concept page.
+# Filters out type:answer pages so exercise-list pages don't show every model
+# answer as a separate item alongside the exercise.
 cat > "$TARGET/site/layouts/_default/list.html" <<'EOF'
 {{ define "main" }}
 <div class="section">
   <h1>{{ .Title }}</h1>
   {{ .Content }}
   {{ $children := .Sections.ByWeight }}
-  {{ if eq (len $children) 0 }}{{ $children = .Pages.ByWeight }}{{ end }}
+  {{ if eq (len $children) 0 }}
+    {{ $children = where .Pages.ByWeight ".Type" "ne" "answer" }}
+  {{ end }}
   {{ if $children }}
   <ol class="module-list">
     {{ range $children }}
@@ -706,9 +752,34 @@ th { background: var(--color-primary-soft); font-family: var(--font-ui); }
 .module-nav a:hover { color: var(--color-analogous); }
 .module-nav .label { color: var(--color-muted); font-size: 0.85em; }
 
-/* Single page (validation, exercise, glossary) */
+/* Single page (validation, exercise, answer, glossary) */
 .single { /* prose styles inherit */ }
 .back-link { margin-top: 2rem; font-family: var(--font-ui); font-size: 0.9em; }
+
+/* Model-answer CTA — sits at the bottom of an exercise page, deliberately
+ * styled so the learner has to make an active choice to reveal it. */
+.model-answer-cta {
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px dashed var(--color-primary);
+  border-radius: 8px;
+  background: var(--color-primary-fade);
+}
+.model-answer-cta p { margin: 0 0 0.75rem; color: var(--color-text); }
+.model-answer-cta p strong { color: var(--color-primary-strong); }
+.model-answer-button {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--color-bg);
+  background: var(--color-primary);
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+.model-answer-button:hover { background: var(--color-primary-strong); }
 
 footer { max-width: var(--layout-max); margin: 3rem auto 1.5rem; padding: 1.5rem 1.25rem 0; border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 0.9em; text-align: center; }
 EOF

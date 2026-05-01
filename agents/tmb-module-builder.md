@@ -55,15 +55,16 @@ If the script returns `{ok: false}`, surface the error and exit.
 
 ## What you write
 
-Three pieces of content, all under `site/content/modules/<slug>/`:
+Pieces of content under `site/content/modules/<slug>/`:
 
 1. **`_index.md` body** — replace the placeholder comment block with the concept content (structure below).
-2. **`exercises/<name>.md`** — at least one exercise page (you create these). Filename is kebab-case from the exercise subject.
-3. **`validation.md` body** — replace the `<!-- builder: -->` placeholders with real content.
+2. **`exercises/<name>.md`** — at least one exercise page (you create these).
+3. **`exercises/<name>-answer.md`** — a sibling model-answer page for every exercise.
+4. **`validation.md` body** — replace the `<!-- builder: -->` placeholders with real content.
 
 Plus, if needed:
 
-4. **`modules/<slug>/new_terms.yaml`** — append entries for any term you used that's NOT in `research.yaml.glossary` AND NOT in `spine.glossary_seed`.
+5. **`modules/<slug>/new_terms.yaml`** — append entries for any term you used that's NOT in `research.yaml.glossary` AND NOT in `spine.glossary_seed`.
 
 You do NOT touch any path outside this list. The old v0.4.2 layout (`modules/<slug>/exercises/`, `modules/<slug>/VALIDATION.md`) is gone — those locations are NOT visible on the Hugo site.
 
@@ -92,9 +93,16 @@ The first arg is the canonical term (matches the glossary entry). The second is 
 
 ## Exercise pages
 
-Read `brief.exercise_goal`. Produce at least one file at `site/content/modules/<slug>/exercises/<name>.md` (kebab-case filename from the exercise subject).
+Read `brief.exercise_goal`. Produce at least one exercise — and **for every exercise, produce a sibling model-answer file** so the learner can compare their work after attempting.
 
-Each exercise page needs frontmatter — copy this template and fill it in:
+Files per exercise (kebab-case `<name>` from the exercise subject):
+
+- `site/content/modules/<slug>/exercises/<name>.md` — the prompt + scaffold with `[TODO:]` markers.
+- `site/content/modules/<slug>/exercises/<name>-answer.md` — the worked solution and tradeoff commentary.
+
+The Hugo layout cross-links them automatically: the exercise page renders a "Show model answer →" CTA at the bottom, the answer page renders a "← Back to the exercise" link. You don't write those links in markdown; the `_default/single.html` layout looks up siblings by name.
+
+### Exercise frontmatter + body
 
 ```yaml
 ---
@@ -105,14 +113,33 @@ draft: false
 ---
 ```
 
-Then the body:
+Body:
 
 1. **What you'll do.** One paragraph. Concrete outcome.
 2. **Setup.** Minimum viable. `spine.tools_present` tells you what's installed.
 3. **Starter code / scaffold** in a code block, with `[TODO: <specific thing>]` markers from `brief.exercise_goal` placed exactly where the learner fills in thinking.
 4. **Verification.** One paragraph explaining how the learner knows they did it right.
 
-**Hard rule: every module produces at least one exercise file with at least two `[TODO:]` markers.** A module without exercises has failed its core promise — testing understanding, not just transferring it. The reviewer flags any module where `len(exercises/*.md) == 0` as `build_failure`.
+Do NOT write a "model answer" link in the body — the layout handles that.
+
+### Answer frontmatter + body
+
+```yaml
+---
+title: "Model answer: <exercise title>"
+type: answer
+weight: <same as exercise + 0.5, or just match>
+draft: false
+---
+```
+
+Body:
+
+1. **The worked solution.** Fill in every `[TODO:]` marker with what you'd actually put there. Show the complete code/text the learner should arrive at.
+2. **Why these choices.** One short section explaining the tradeoffs — why this approach over alternatives the learner might have tried. This is where the model answer earns its keep over a bare solution: name the temptation that *won't* work and explain why.
+3. **Common pitfalls.** Two or three things learners predictably get wrong on this exercise. State the wrong-then-right pattern.
+
+**Hard rule: every exercise has both files (`<name>.md` AND `<name>-answer.md`).** A module without exercise+answer pairs has failed its core promise — testing understanding, then letting the learner verify it. The reviewer flags any orphan exercise (one without an answer) as `build_failure`.
 
 ## Validation page body
 

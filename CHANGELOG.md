@@ -1,6 +1,25 @@
 # Changelog
 
-## 0.4.12 — 2026-04-30
+## 0.4.13 — 2026-04-30
+
+### Added
+
+- **Every exercise gets a paired model-answer page.** Filename pattern: an exercise at `exercises/<name>.md` has a sibling at `exercises/<name>-answer.md`. The Hugo layout cross-links them automatically:
+  - The exercise page renders a "Show model answer →" CTA at the bottom (dashed border, soft primary background, deliberate-click button — not a passive scroll target).
+  - The answer page renders a "← Back to the exercise" link.
+  - The exercises list page filters out `type: answer` so each pair shows as a single entry, not two.
+  - URL pattern: `/modules/<slug>/exercises/<name>/` (exercise) and `/modules/<slug>/exercises/<name>-answer/` (answer).
+
+  No links are written into the markdown body — `_default/single.html` does the lookup via `.Parent.GetPage` so cross-linking is structural, not content-coupled.
+
+### Changed
+
+- **Module-builder agent contract** now requires both files per exercise. The answer body must include: the worked solution (every `[TODO:]` filled in), a "Why these choices" tradeoff section, and a "Common pitfalls" wrong-then-right list. The reviewer flags any orphan exercise (no matching answer) as `build_failure`.
+- **New archetype `archetypes/answer.md`** with `type: answer` so future Hugo `hugo new` invocations get the right frontmatter.
+
+### Migration
+
+Existing v0.4.x curricula don't have answer pages — only new modules built under v0.4.13 will. Layout change is safe: with no answer file, the CTA simply doesn't render. To retroactively add answers to existing modules, re-dispatch the module-builder for each module (a one-shot task; ask the agent to "add a model-answer file for each exercise").
 
 ### Fixed
 
