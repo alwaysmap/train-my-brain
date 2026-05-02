@@ -279,6 +279,35 @@ Hugo shortcodes use `{{< >}}` or `{{% %}}` syntax. The difference:
 
 For the `ref` shortcode (links), always use `{{< ref "..." >}}`.
 
+### Don't accidentally write the *escaped* shortcode form
+
+Hugo also has an **escaped** shortcode form, written `{{</* shortcode */>}}`
+(note the `/*` and `*/`). This is meant for tutorials that need to *show*
+shortcode syntax to a reader without invoking it — Hugo prints it back as
+literal text instead of evaluating it.
+
+You almost never want this in normal prose. If you write:
+
+```markdown
+The {{</* gloss "AMO standard" */>}} sets the wood-arrow spine convention.
+```
+
+…the page renders the literal string `{{< gloss "AMO standard" >}}` instead
+of a glossary link, which looks like a build error to a reader.
+
+**Rule:** in module body content, exercises, and validation pages, always
+use the live form `{{< gloss "..." >}}`. Reserve `{{</* ... */>}}` for
+documentation that genuinely needs to display shortcode syntax (e.g., a
+markdown-gotchas reference like this one).
+
+A quick audit when something is rendering as raw text:
+
+```bash
+grep -rn '{{</\*' site/content/
+```
+
+Any match outside an explicit "how to write a shortcode" passage is a bug.
+
 ---
 
 ## Behavior differences: Hugo vs. GitHub markdown
