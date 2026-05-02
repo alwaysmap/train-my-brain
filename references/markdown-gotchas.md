@@ -310,6 +310,58 @@ Any match outside an explicit "how to write a shortcode" passage is a bug.
 
 ---
 
+## Mermaid diagrams
+
+Hugo curricula render Mermaid via the standard mermaid.js CDN. As of v11
+(2026), Mermaid rejects several patterns that older versions tolerated.
+Each one renders as a cartoon-bomb "Syntax error in text" image instead of
+the diagram you wrote.
+
+### Quote any label that isn't pure ASCII alphanumeric
+
+Mermaid v11 rejects unquoted node labels containing:
+
+- Unicode (degree symbols, em-dashes, accented characters, etc.)
+- Apostrophes (`Archer's paradox`)
+- Literal `\n` (it's not interpreted as a newline)
+
+Always quote the label and use `<br/>` for line breaks:
+
+```
+flowchart TD
+    A["5° taper"] --> B["Hang to dry<br/>24 hrs min"]
+    C["Archer's paradox"] --> D
+```
+
+Inside quoted labels you can use any character; outside, you cannot.
+
+### Subgraph titles need the bracket form for multi-word names
+
+```
+subgraph Point end          # ❌ Mermaid v11 rejects this
+subgraph PointEnd ["Point end"]   # ✅ correct
+subgraph "Point end"              # ✅ also correct
+```
+
+### `flowchart LR` is for short comparisons, not long chains
+
+`LR` (left-to-right) flowcharts compress horizontally on narrow site
+columns. With more than ~6 nodes the diagram becomes a single row of
+unreadable thumbnails. **For any chain longer than 5–6 nodes use
+`flowchart TD`** (top-down). LR is the right call when you have two short
+parallel branches you want to read side by side.
+
+### Auditing existing diagrams
+
+`scripts/check-mermaid.sh` flags all four patterns above. The reviewer
+runs it as part of `mode=full`. Run it manually:
+
+```bash
+bash scripts/check-mermaid.sh <curriculum_root>
+```
+
+---
+
 ## Behavior differences: Hugo vs. GitHub markdown
 
 When previewing `.md` files in GitHub's repository view, you're seeing GitHub's
