@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# check-frontmatter.sh — Verify each module's index.md frontmatter matches its brief.
+# check-frontmatter.sh — Verify each module's _index.md frontmatter matches its brief.
 #
-# For every briefs/*.yaml, opens site/content/modules/<slug>/index.md and
+# For every briefs/*.yaml, opens site/content/modules/<slug>/_index.md and
 # compares brief-sourced fields. Emits a JSON report of every mismatch and
 # every missing page.
 #
@@ -34,7 +34,7 @@ shopt -s nullglob
 
 for b in "$BRIEFS_DIR"/*.yaml; do
   slug=$(basename "$b" .yaml)
-  page="$ROOT/site/content/modules/$slug/index.md"
+  page="$ROOT/site/content/modules/$slug/_index.md"
   if [ ! -f "$page" ]; then
     missing=$(jq -c --arg s "$slug" '. + [$s]' <<< "$missing")
     continue

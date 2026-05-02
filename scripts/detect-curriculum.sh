@@ -49,7 +49,7 @@ count=${#briefs[@]}
 missing="[]"
 for b in "${briefs[@]}"; do
   slug=$(basename "$b" .yaml)
-  page="$ROOT/site/content/modules/$slug/index.md"
+  page="$ROOT/site/content/modules/$slug/_index.md"
   [ -f "$page" ] || missing=$(jq -c --arg s "$slug" '. + [$s]' <<< "$missing")
 done
 

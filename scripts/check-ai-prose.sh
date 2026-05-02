@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check-ai-prose.sh — Regex-based AI-prose detector against module pages.
 #
-# Scans every site/content/modules/*/index.md (body only, frontmatter excluded)
+# Scans every site/content/modules/*/_index.md (body only, frontmatter excluded)
 # for opener clichés, fake enthusiasm, vague value claims, and consulting-speak.
 #
 # Output: JSON
@@ -32,7 +32,7 @@ PATTERNS=(
 hits="[]"
 shopt -s nullglob
 
-for page in "$MODULES_DIR"/*/index.md; do
+for page in "$MODULES_DIR"/*/_index.md; do
   slug=$(basename "$(dirname "$page")")
   body=$(awk 'BEGIN{c=0} /^---/{c++; next} c>=2' "$page")
   while IFS= read -r line; do
