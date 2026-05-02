@@ -2,6 +2,20 @@
 
 ## 0.4.19 — 2026-05-01
 
+### Changed — visuals strategy: prefer YouTube embeds, bundle downloaded images, cap budgets
+
+Building the `traditional-wood-arrows` curriculum surfaced a UX problem: the module-builder defaulted to `visual-needed` callouts (search-hint placeholders) for ~26 visuals across 5 modules and hotlinked the few real images it did find. The result felt like a search-hint blog rather than a curriculum — every other section pointed the reader off-site to do their own searching.
+
+Updated `agents/tmb-module-builder.md` with three shifts:
+
+1. **Prefer `{{< youtube ID >}}` over `visual-needed` for motion/procedure topics.** A 60-second embedded demo teaches more than three paragraphs of prose plus a "search YouTube" callout. Cap embedded videos at ~10 across the whole curriculum so the curriculum doesn't become a YouTube playlist.
+2. **Download images into the module's page bundle, do not hotlink.** Each module is a Hugo branch bundle; dropping `image.jpg` next to `_index.md` and referencing it by filename couples the image to the page that uses it, survives offline cache and upstream URL changes, and resolves correctly under path-prefixed deploys.
+3. **Aim for ~1 image per module; ≤3 `visual-needed` per module.** Beyond that, the module feels empty. Step back and check whether a YouTube embed would do the job better.
+
+The module-builder prompt now spells out the download-and-resize workflow (curl with a real User-Agent, `sips -Z 1024` for oversize files) and reorders the shortcode docs so `youtube` comes first, `figure` second, `visual-needed` last.
+
+Existing curricula keep working — this only changes what new module-builders produce.
+
 ### Fixed — nav/gloss links broken when published under a path-prefixed baseURL
 
 `/tmb:publish` deploys to `https://<user>.github.io/<repo>/`, where the
