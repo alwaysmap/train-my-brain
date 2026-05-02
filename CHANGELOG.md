@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.19 — 2026-05-01
+
+### Fixed — nav/gloss links broken when published under a path-prefixed baseURL
+
+`/tmb:publish` deploys to `https://<user>.github.io/<repo>/`, where the
+baseURL has a basepath (`/<repo>/`). The scaffold's nav and `gloss`
+shortcode used `"/path/" | relURL`, which does not prepend the basepath
+for absolute inputs — so the brand link rendered as `href="/"` and the
+glossary shortcode rendered as `href="/glossary/#anchor"`, both 404'ing
+under the deployed URL while working fine under `hugo server`.
+
+Switched both to `RelPermalink` of looked-up pages
+(`site.Home.RelPermalink`, `(site.GetPage "/modules").RelPermalink`,
+etc.) — the idiomatic Hugo pattern that respects the baseURL basepath
+and works under both `hugo server` and the deploy `--baseURL` flag.
+The modules sidebar already used this pattern correctly.
+
+Existing curricula can pick up the fix by running `/tmb:rebuild-site`,
+which re-runs `scaffold-site.sh` against the existing content tree.
+
 ## 0.4.18 — 2026-05-01
 
 ### Fixed — five issues found building a real curriculum

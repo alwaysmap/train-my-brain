@@ -343,11 +343,11 @@ EOF
 cat > "$TARGET/site/layouts/partials/nav.html" <<'EOF'
 <nav class="topnav">
   <div class="topnav-inner">
-    <a href="{{ "/" | relURL }}" class="brand">{{ .Site.Title }}</a>
+    <a href="{{ site.Home.RelPermalink }}" class="brand">{{ .Site.Title }}</a>
     <ul>
-      <li><a href="{{ "/modules/" | relURL }}">Modules</a></li>
-      <li><a href="{{ "/glossary/" | relURL }}">Glossary</a></li>
-      <li><a href="{{ "/about/" | relURL }}">About</a></li>
+      {{ with site.GetPage "/modules" }}<li><a href="{{ .RelPermalink }}">Modules</a></li>{{ end }}
+      {{ with site.GetPage "/glossary" }}<li><a href="{{ .RelPermalink }}">Glossary</a></li>{{ end }}
+      {{ with site.GetPage "/about" }}<li><a href="{{ .RelPermalink }}">About</a></li>{{ end }}
     </ul>
     <div class="theme-switch" role="group" aria-label="Color theme">
       <button type="button" data-theme-set="light" aria-label="Light theme" title="Light theme">
@@ -396,7 +396,8 @@ cat > "$TARGET/site/layouts/shortcodes/gloss.html" <<'EOF'
 {{- $term := .Get 0 -}}
 {{- $display := .Get 1 | default $term -}}
 {{- $anchor := $term | urlize -}}
-<a class="gloss" href="{{ "/glossary/" | relURL }}#{{ $anchor }}">{{ $display }}</a>
+{{- $glossary := site.GetPage "/glossary" -}}
+<a class="gloss" href="{{ with $glossary }}{{ .RelPermalink }}{{ end }}#{{ $anchor }}">{{ $display }}</a>
 EOF
 
 # Visual-needed shortcode: a styled callout that renders where a real
