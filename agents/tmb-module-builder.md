@@ -88,32 +88,42 @@ A wall of text is the most common failure mode of an LLM-built curriculum. Most 
 1. **At least one Mermaid diagram** in the mechanism section (see below).
 2. **At least one real image or embedded video** — a Wikimedia/NPS/PD photo, a public-domain illustration, an inline `figure` shortcode pointing to a verified free-use URL, or an inline YouTube embed.
 
-The scaffold provides three Hugo shortcodes you should use freely:
+The scaffold provides three Hugo shortcodes. Pick the right one for the topic — the order below is a strong preference, not just an enumeration.
 
-#### `figure` — embed a real image with caption + attribution
+**Visual budget for the whole curriculum:** aim for **roughly one image per module** and **at most ~10 embedded YouTube videos across the entire curriculum** (typically 1–2 per module). Beyond that, the curriculum starts to feel like a search-hint blog or a YouTube playlist with thin original content. If you've already used a video on a sibling page (concept vs. exercise) covering the same procedure, do NOT re-embed it — link to it or fall back to `visual-needed`.
 
-```
-{{< figure
-    src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Arrow-flexing.png"
-    alt="Diagram showing an arrow flexing around the bow riser during release"
-    caption="Source: Wikimedia Commons, Hagis123123, CC BY-SA 3.0." >}}
-```
-
-Always include `alt` (accessibility) and `caption` (attribution). The caption is required for any CC-licensed image — bare URLs without attribution violate the license.
-
-#### `youtube` — embed an inline video
+#### `youtube` — embed an inline video (preferred for motion / procedure)
 
 Hugo's built-in `youtube` shortcode takes a video ID:
 
 ```
-{{< youtube id="dQw4w9WgXcQ" title="Tutorial: Heel-of-hand arrow straightening" >}}
+{{< youtube dQw4w9WgXcQ >}}
+
+*Caption text describing what the viewer should watch for.*
 ```
 
-Use YouTube embeds for *processes* — anything where motion or sequence carries meaning that a still photo can't (straightening technique, jig setup, knot tying, dipping motion, drawing the bow). Always include `title` for screen readers.
+**Prefer this over `visual-needed` whenever the topic is a hands-on procedure where motion or sequence carries the meaning** — straightening technique, jig setup, knot tying, dipping motion, drawing the bow, soldering, knife sharpening. A 60-second embedded demo teaches more than three paragraphs of prose plus a "go search YouTube" callout.
 
-#### `visual-needed` — actionable placeholder when no free-use match exists
+When picking a video: search for one specific demo, prefer creators with a clear teaching style and channels with a body of related work (a series like "Wood Arrow Making 101" beats a one-off vlog), and write a one-line caption pointing the reader at the part of the video that matters.
 
-Use this *only* when you've genuinely searched and free-use coverage is thin. It renders a styled callout with one-click YouTube + Wikimedia search links so the reader can find a video themselves rather than reading a wall of HTML comments.
+#### `figure` — embed a real image, co-located with the page
+
+```
+{{< figure
+    src="archers-paradox.png"
+    alt="Diagram showing an arrow flexing around the bow riser during release"
+    caption="Source: Wikimedia Commons, Hagis123123, CC BY-SA 3.0." >}}
+```
+
+**Download images into the module's page bundle** — drop the file at `site/content/modules/NN-slug/IMAGE.jpg` next to the `_index.md` you're writing, and reference it by filename only. Each module is a Hugo branch bundle, so files placed there become page resources of the bundle and resolve correctly under both `hugo server` and the deployed `--baseURL` (including path-prefixed deploys like GitHub Pages under `/<repo>/`).
+
+Do **not** hotlink `https://upload.wikimedia.org/...` URLs directly in `figure src`. Hotlinking couples the curriculum to upstream URL stability, breaks under offline cache, and depends on Wikimedia's hotlinking policy continuing unchanged.
+
+Always include `alt` (accessibility) and `caption` (attribution). The caption is required for any CC-licensed image — using one without attribution violates the license.
+
+#### `visual-needed` — fallback when no free-use match exists *and* no good video exists
+
+Use this *only* when you've genuinely searched both Wikimedia Commons and YouTube and neither produced a usable result. It renders a styled callout with one-click YouTube + Wikimedia search links so the reader can find one themselves.
 
 ```
 {{< visual-needed what="Heel-of-hand straightening technique"
@@ -125,17 +135,19 @@ will teach more than three paragraphs of prose.
 {{< /visual-needed >}}
 ```
 
-**Hard rule: do NOT leave bare HTML comments like `<!-- TODO: source image -->` in shipped modules.** The reader sees an invisible nothing where they expected a visual. Either find a real image, embed a YouTube video, or drop in a `visual-needed` callout. All three are infinitely better than a comment that looks fine in your editor and broken on the page.
+**A curriculum dominated by `visual-needed` callouts feels empty.** If you reach for `visual-needed` more than ~3 times in a single module, stop and ask whether the topic actually has a YouTube demo you missed.
+
+**Hard rule: do NOT leave bare HTML comments like `<!-- TODO: source image -->` in shipped modules.** The reader sees an invisible nothing where they expected a visual. Embed a video, embed a downloaded image, or drop in a `visual-needed` callout. All three are infinitely better than a comment that looks fine in your editor and broken on the page.
 
 Mandatory sourcing process for any image you embed:
 
 1. Search Wikimedia Commons category pages and `commons.wikimedia.org/w/index.php?search=...&ns0=1` for the topic.
-2. Click into a candidate File: page. Confirm it has a CC-BY / CC-BY-SA / CC0 / PD license clearly stated.
-3. Right-click the image and copy its direct `upload.wikimedia.org/...` URL (NOT the `commons.wikimedia.org/wiki/File:...` URL).
-4. WebFetch the URL to confirm it returns HTTP 200 with an image content-type.
-5. Use the `figure` shortcode with that URL plus author + license in the caption.
+2. Open the candidate `File:` page. Confirm it has a CC-BY / CC-BY-SA / CC0 / PD license clearly stated. Capture the direct `upload.wikimedia.org/...` URL (the "Original file" link), the author name, and the license.
+3. Download the file into the module's page bundle: `curl -sSL -A "<curriculum-name>/1.0 (https://example.org; you@example.org)" -o site/content/modules/NN-slug/short-name.ext "https://upload.wikimedia.org/..."`. The User-Agent matters — Wikimedia rejects empty/generic UAs.
+4. Verify the download is a real image (`file site/content/modules/NN-slug/short-name.ext` should report image data, not HTML). If the file is over ~1 MB, resize: `sips -Z 1024 site/content/modules/NN-slug/short-name.ext` (macOS) keeps the longest side at 1024 px.
+5. Reference it via the `figure` shortcode using just the filename in `src`, with the author + license in `caption`.
 
-If steps 1–2 produce nothing after a real search (not a 30-second skim), the right move is `visual-needed`, not a fabricated URL or a TODO comment.
+If steps 1–2 produce nothing after a real search (not a 30-second skim), check whether a YouTube embed would do the same job better. If neither exists, use `visual-needed` — never a fabricated URL or a TODO comment.
 
 ### Mermaid diagrams
 
