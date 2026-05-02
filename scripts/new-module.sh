@@ -101,14 +101,17 @@ PRIOR=$(yq '.prior_ends_with' "$BRIEF")
 NEXT=$(yq '.next_expects' "$BRIEF")
 CONCEPTS_YAML=$(yq -o=json '.concepts' "$BRIEF" | jq -c '.')
 
-yq -i ".title = \"$TITLE\"" "$FM"
-yq -i ".short_title = \"$SHORT_TITLE\"" "$FM"
+# Use yq's strenv() form for any string value — reads from the environment
+# instead of being interpolated by the shell, so values containing literal "
+# (e.g. inch marks: 11/32" or 28") don't terminate the yq argument early.
+TITLE="$TITLE"           yq -i '.title             = strenv(TITLE)'         "$FM"
+SHORT_TITLE="$SHORT_TITLE" yq -i '.short_title     = strenv(SHORT_TITLE)'   "$FM"
 yq -i ".weight = $WEIGHT" "$FM"
-yq -i ".driving_question = \"$DQ\"" "$FM"
-yq -i ".contrast.alternative = \"$CONTRAST_ALT\"" "$FM"
-yq -i ".contrast.when_alternative_wins = \"$CONTRAST_WHEN\"" "$FM"
-yq -i ".prior_ends_with = \"$PRIOR\"" "$FM"
-yq -i ".next_expects = \"$NEXT\"" "$FM"
+DQ="$DQ"                 yq -i '.driving_question  = strenv(DQ)'            "$FM"
+CONTRAST_ALT="$CONTRAST_ALT"   yq -i '.contrast.alternative          = strenv(CONTRAST_ALT)'  "$FM"
+CONTRAST_WHEN="$CONTRAST_WHEN" yq -i '.contrast.when_alternative_wins = strenv(CONTRAST_WHEN)' "$FM"
+PRIOR="$PRIOR"           yq -i '.prior_ends_with   = strenv(PRIOR)'         "$FM"
+NEXT="$NEXT"             yq -i '.next_expects      = strenv(NEXT)'          "$FM"
 # Leave summary empty — it's an OPTIONAL one-sentence framing that adds info
 # beyond the driving question. Module-builders can fill it in when they have
 # something useful to say; otherwise the layout skips the field. Pre-v0.4.8
@@ -125,7 +128,7 @@ write_with_fm "$FM" "$BODY" "$CONCEPT"
 SCENARIO=$(yq '.validation_scenario' "$BRIEF")
 VAL_FM=$(mktemp); VAL_BODY=$(mktemp)
 split_fm_body "$VAL_FM" "$VAL_BODY" "$VALIDATION"
-yq -i ".title = \"Validation: $TITLE\"" "$VAL_FM"
+VAL_TITLE="Validation: $TITLE" yq -i '.title = strenv(VAL_TITLE)' "$VAL_FM"
 yq -i ".weight = 100" "$VAL_FM"   # validation always sorts last among section pages
 
 cat > "$VAL_BODY" <<EOF

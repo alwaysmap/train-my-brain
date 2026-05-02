@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check-adjacency.sh — Verify the next_expects ↔ prior_ends_with chain.
 #
-# Reads briefs/*.yaml AND site/content/modules/*/index.md frontmatter.
+# Reads briefs/*.yaml AND site/content/modules/*/_index.md frontmatter.
 # Compares (after whitespace normalization):
 #   - brief N.next_expects == brief N+1.prior_ends_with
 #   - brief.next_expects   == frontmatter.next_expects
@@ -56,7 +56,7 @@ done
 # Brief-to-frontmatter sync.
 for b in "${sorted[@]}"; do
   slug=$(basename "$b" .yaml)
-  page="$ROOT/site/content/modules/$slug/index.md"
+  page="$ROOT/site/content/modules/$slug/_index.md"
   [ -f "$page" ] || { add_miss "missing-page" "$slug" "$page" "(not found)"; continue; }
   fm_prior=$(awk '/^---/{c++; next} c==1' "$page" | yq '.prior_ends_with' - | normalize)
   fm_next=$(awk '/^---/{c++; next} c==1'  "$page" | yq '.next_expects'   - | normalize)

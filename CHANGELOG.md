@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.4.18 — 2026-05-01
+
+### Fixed — five issues found building a real curriculum
+
+Building a real `traditional-wood-arrows` curriculum surfaced five distinct issues across the build pipeline. None individually were release-blocking; together they degraded the rendered curriculum noticeably (partial bootstrap, raw template text, broken Mermaid diagrams, walls of text instead of visuals).
+
+#### `new-module.sh` no longer fails on briefs containing literal `"`
+
+The script previously interpolated brief values into `yq` via the shell:
+
+```bash
+yq -i ".next_expects = \"$NEXT\"" "$FM"
+```
+
+When a brief contained inch marks (`11/32"`, `28"`) or any other literal `"`, the expansion produced malformed `yq` input and modules were partially bootstrapped — the concept page was written but `validation.md` and `exercises/_index.md` were silently skipped. Switched all string assignments to `yq`'s `strenv()` form so the shell never interpolates value characters into the `yq` argument.
+
+#### Reviewer scripts now look for `_index.md` (Hugo branch bundles)
+
+`new-module.sh` produces Hugo branch bundles (`_index.md`), but `check-adjacency.sh`, `check-frontmatter.sh`, `check-ai-prose.sh`, and `detect-curriculum.sh` were still referencing the leaf-bundle convention. Result: every healthy curriculum reported `ok: false` on adjacency and frontmatter checks because the scripts couldn't locate the page they were trying to read.
+
+#### Escaped Hugo shortcodes flagged
+
+Module-builder agents sometimes emit Hugo's escaped shortcode form `{{</* gloss */>}}` in module body content. Hugo prints those as literal `{{< gloss "Term" >}}` text instead of clickable glossary links. Added `scripts/check-shortcodes.sh` (a pure-bash linter that ignores fenced code blocks) and corresponding documentation in `references/markdown-gotchas.md`. Wired into the reviewer's Phase A.
+
+#### Mermaid v11 syntax linter
+
+Module-builders frequently emit Mermaid blocks that older versions tolerated but v11 rejects with "Syntax error in text". Five distinct patterns reproduced and now flagged by `scripts/check-mermaid.sh`:
+
+- ° / em-dashes / other Unicode inside unquoted node labels
+- Literal `\n` for line breaks (Mermaid expects `<br/>`)
+- Apostrophes inside unquoted labels (`Archer's paradox`)
+- `subgraph Two Words` without bracket-or-quote form
+- `flowchart LR` with 7+ arrows (parses but renders as illegible thumbnails)
+
+Pure bash + grep + jq for portability across macOS BSD awk and Linux GNU awk. Documented in `references/markdown-gotchas.md`. Wired into the reviewer's Phase A.
+
+#### Visual content is now mandatory, not optional
+
+The largest change. Module-builders followed the path of least resistance and emitted `<!-- TODO: source image — search Wikimedia for "X" -->` instead of actually finding free-use imagery and embedding it. For a self-described visual learner the rendered curriculum was just prose.
+
+- `agents/tmb-module-builder.md` mandates at least one real image OR YouTube embed per module, with a five-step sourcing process (search Wikimedia category, verify CC license, copy `upload.wikimedia` direct URL, WebFetch to confirm 200, embed via `figure` shortcode with attribution caption). Bare `<!-- TODO: source image -->` comments in shipped modules are now an explicit anti-pattern.
+- `references/curriculum-design.md` adds rule 7 ("Visual content is required, not optional").
+- `scripts/scaffold-site.sh` ships a new `visual-needed` shortcode in every scaffolded curriculum: a styled callout with one-click YouTube + Wikimedia search links, used as a fallback when free-use coverage is genuinely unavailable. Far better than an invisible HTML comment.
+
+#### Module-list hover-state contrast fix
+
+The previous `linear-gradient(135deg, var(--color-primary-fade), var(--color-bg) 70%)` hover was reading as a saturated tinted block on some hue values, fighting the title color and washing out the italic driving-question text. Replaced with a low-alpha primary tint (`hsla(var(--hue), 60%, 50%, 0.06)`) that lets the page background dominate, keeping text contrast high.
+
 ## 0.4.17 — 2026-05-01
 
 ### Added — design system rewrite + theme switch + content-quality gates
