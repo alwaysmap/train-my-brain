@@ -76,7 +76,11 @@ URLS=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-urls.sh "<curriculum_root>")
 AI_PROSE=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-ai-prose.sh "<curriculum_root>")
 GLOSSARY=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/merge-glossary.sh "<curriculum_root>")
 CITATIONS=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-citations.sh "<curriculum_root>")
+SHORTCODES=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-shortcodes.sh "<curriculum_root>")
+MERMAID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-mermaid.sh "<curriculum_root>")
 ```
+
+`check-shortcodes.sh` flags any escaped `{{</* gloss */>}}` shortcode in module body content (outside fenced code blocks) — these render as raw text instead of clickable glossary links. `check-mermaid.sh` flags Mermaid v11 syntax patterns that throw "Syntax error in text" at render time (unquoted Unicode/apostrophes inside labels, literal `\n` line breaks, multi-word subgraph titles, and overlong `flowchart LR` chains that produce illegible diagrams). Both produce one substantive flag per hit.
 
 Each returns `{ok: bool, ...details}`. Treat any `ok: false` as a candidate for a substantive flag (URL reachability is the exception — non-2xx is a real problem).
 

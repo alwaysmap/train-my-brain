@@ -81,25 +81,88 @@ Structure:
 5. **Reading.** Two-item list. Pull URL + section anchor verbatim from your brief.
 6. **Coming next.** One sentence mirroring `brief.next_expects`.
 
-### Diagrams
+### Visual content is mandatory, not optional
 
-Pure prose is a failure mode for concept-heavy modules. Every concept page must include **at least one Mermaid diagram** in the mechanism section. The scaffold wires up Mermaid via a render hook — any fenced code block tagged ```` ```mermaid ```` becomes an SVG diagram on the page. Pick the form that matches the concept:
+A wall of text is the most common failure mode of an LLM-built curriculum. Most readers — including ones who say nothing about being visual learners — process diagrams, photographs, and short videos faster and remember them longer than prose. **Every module must include at least one of each:**
 
-- `flowchart LR` for processes / pipelines / decision flows (most common).
+1. **At least one Mermaid diagram** in the mechanism section (see below).
+2. **At least one real image or embedded video** — a Wikimedia/NPS/PD photo, a public-domain illustration, an inline `figure` shortcode pointing to a verified free-use URL, or an inline YouTube embed.
+
+The scaffold provides three Hugo shortcodes you should use freely:
+
+#### `figure` — embed a real image with caption + attribution
+
+```
+{{< figure
+    src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Arrow-flexing.png"
+    alt="Diagram showing an arrow flexing around the bow riser during release"
+    caption="Source: Wikimedia Commons, Hagis123123, CC BY-SA 3.0." >}}
+```
+
+Always include `alt` (accessibility) and `caption` (attribution). The caption is required for any CC-licensed image — bare URLs without attribution violate the license.
+
+#### `youtube` — embed an inline video
+
+Hugo's built-in `youtube` shortcode takes a video ID:
+
+```
+{{< youtube id="dQw4w9WgXcQ" title="Tutorial: Heel-of-hand arrow straightening" >}}
+```
+
+Use YouTube embeds for *processes* — anything where motion or sequence carries meaning that a still photo can't (straightening technique, jig setup, knot tying, dipping motion, drawing the bow). Always include `title` for screen readers.
+
+#### `visual-needed` — actionable placeholder when no free-use match exists
+
+Use this *only* when you've genuinely searched and free-use coverage is thin. It renders a styled callout with one-click YouTube + Wikimedia search links so the reader can find a video themselves rather than reading a wall of HTML comments.
+
+```
+{{< visual-needed what="Heel-of-hand straightening technique"
+                  youtube="straightening wood arrow shafts heel of hand"
+                  wikimedia="arrow straightening" >}}
+A close-up of hands working a slight bend out of a wood arrow shaft.
+The motion is hard to describe in words; a 30-second YouTube tutorial
+will teach more than three paragraphs of prose.
+{{< /visual-needed >}}
+```
+
+**Hard rule: do NOT leave bare HTML comments like `<!-- TODO: source image -->` in shipped modules.** The reader sees an invisible nothing where they expected a visual. Either find a real image, embed a YouTube video, or drop in a `visual-needed` callout. All three are infinitely better than a comment that looks fine in your editor and broken on the page.
+
+Mandatory sourcing process for any image you embed:
+
+1. Search Wikimedia Commons category pages and `commons.wikimedia.org/w/index.php?search=...&ns0=1` for the topic.
+2. Click into a candidate File: page. Confirm it has a CC-BY / CC-BY-SA / CC0 / PD license clearly stated.
+3. Right-click the image and copy its direct `upload.wikimedia.org/...` URL (NOT the `commons.wikimedia.org/wiki/File:...` URL).
+4. WebFetch the URL to confirm it returns HTTP 200 with an image content-type.
+5. Use the `figure` shortcode with that URL plus author + license in the caption.
+
+If steps 1–2 produce nothing after a real search (not a 30-second skim), the right move is `visual-needed`, not a fabricated URL or a TODO comment.
+
+### Mermaid diagrams
+
+Pick the form that matches the concept:
+
+- `flowchart TD` for processes / pipelines / decision flows with more than ~6 nodes (TD stays readable on narrow site columns; LR cramps).
+- `flowchart LR` for short side-by-side comparisons (≤6 nodes).
 - `sequenceDiagram` when the concept is about ordered interactions between actors or systems.
 - `classDiagram` or a small `flowchart` when the concept is about relationships between entities.
 - `stateDiagram-v2` when the concept is a lifecycle with discrete states.
 
 Keep the diagram small (under ~10 nodes). The point is to give the reader a mental scaffold, not to render the full system. Don't add a diagram just to have one — but if your "mechanism" section has more than two concepts and no visual, you're doing the reader a disservice.
 
+**Mermaid v11 quoting rules** (the linter `scripts/check-mermaid.sh` enforces these — see `references/markdown-gotchas.md` for full detail):
+
+- Quote any node label containing Unicode (`°`, em-dashes), apostrophes (`Archer's paradox`), or `<br/>` line breaks. `A["5° taper"]` not `A[5° taper]`.
+- Use `<br/>` for line breaks inside quoted labels, not `\n`.
+- Multi-word subgraph titles need bracket form: `subgraph PointEnd ["Point end"]` not `subgraph Point end`.
+
 Example block (literal — write it like this):
 
 ````
 ```mermaid
-flowchart LR
+flowchart TD
     A[Raw input] --> B[Filter]
     B --> C[Transform]
-    C --> D[Output]
+    C --> D["Output: 24 finished items"]
 ```
 ````
 

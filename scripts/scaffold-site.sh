@@ -399,6 +399,36 @@ cat > "$TARGET/site/layouts/shortcodes/gloss.html" <<'EOF'
 <a class="gloss" href="{{ "/glossary/" | relURL }}#{{ $anchor }}">{{ $display }}</a>
 EOF
 
+# Visual-needed shortcode: a styled callout that renders where a real
+# image or video should go but doesn't yet. Use it ONLY when free-use
+# imagery is genuinely unavailable — it gives the reader an actionable
+# YouTube + Wikimedia search instead of an invisible HTML comment.
+#
+# Usage:
+#   {{< visual-needed what="What the visual should show"
+#                     youtube="search query"
+#                     wikimedia="search query" >}}
+#   Optional body prose explaining what the reader is looking for.
+#   {{< /visual-needed >}}
+cat > "$TARGET/site/layouts/shortcodes/visual-needed.html" <<'EOF'
+{{- $what := .Get "what" -}}
+{{- $youtube := .Get "youtube" -}}
+{{- $wikimedia := .Get "wikimedia" -}}
+{{- $description := .Inner -}}
+<aside class="visual-needed" role="note" aria-label="Visual reference needed">
+  <div class="visual-needed-label">Visual reference: {{ $what }}</div>
+  {{ if $description }}<div class="visual-needed-body">{{ $description | markdownify }}</div>{{ end }}
+  <div class="visual-needed-links">
+    {{ if $youtube -}}
+      <a href="https://www.youtube.com/results?search_query={{ $youtube | urlquery }}" target="_blank" rel="noopener noreferrer">▶︎ Watch on YouTube</a>
+    {{- end }}
+    {{ if $wikimedia -}}
+      <a href="https://commons.wikimedia.org/w/index.php?search={{ $wikimedia | urlquery }}&amp;ns0=1" target="_blank" rel="noopener noreferrer">🔍 Search Wikimedia Commons</a>
+    {{- end }}
+  </div>
+</aside>
+EOF
+
 # Home page — short blurb + module list ordered by weight.
 cat > "$TARGET/site/layouts/index.html" <<'EOF'
 {{ define "main" }}
@@ -1279,8 +1309,8 @@ hr {
   gap: var(--space-3);
 }
 /* Whole card is a single anchor — clicking anywhere navigates.
- * Border is a uniform hairline; hover swaps the background to a soft
- * diagonal gradient (primary-fade → bg) and tightens the border to primary. */
+ * Border is a uniform hairline; hover applies a low-alpha primary tint
+ * over the page background so contrast with text stays high. */
 .module-item {
   counter-increment: module;
   border: 1px solid var(--color-border);
@@ -1292,11 +1322,7 @@ hr {
 .module-item:hover,
 .module-item:focus-within {
   border-color: var(--color-primary);
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-fade) 0%,
-    var(--color-bg) 70%
-  );
+  background: hsla(var(--hue), 60%, 50%, 0.06);
   transform: translateY(-1px);
 }
 .module-item-link {
@@ -1341,6 +1367,47 @@ hr {
   color: var(--color-faint);
   font-style: italic;
   font-size: var(--type-xs);
+}
+
+/* ============================================================= */
+/* Visual-needed callout — placeholder for slots where free-use   */
+/* imagery is unavailable. Soft tinted block with action links to */
+/* YouTube and Wikimedia searches. Use sparingly — a wall of      */
+/* these is a sign the module is missing real visual content.    */
+/* ============================================================= */
+.visual-needed {
+  margin: var(--space-6) 0;
+  padding: var(--space-4) var(--space-5);
+  border-left: 3px solid var(--color-primary);
+  background: hsla(var(--hue), 60%, 50%, 0.05);
+  border-radius: var(--radius);
+  font-size: var(--type-sm);
+}
+.visual-needed-label {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--color-primary-strong);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--type-xs);
+}
+.visual-needed-body { margin-bottom: var(--space-3); color: var(--color-text); }
+.visual-needed-body p { margin: 0 0 var(--space-2); }
+.visual-needed-body p:last-child { margin-bottom: 0; }
+.visual-needed-links { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.visual-needed-links a {
+  font-family: var(--font-ui);
+  font-size: var(--type-xs);
+  text-decoration: none;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.visual-needed-links a:hover {
+  background: hsla(var(--hue), 60%, 50%, 0.12);
 }
 
 /* ============================================================= */

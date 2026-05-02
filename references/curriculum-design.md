@@ -74,6 +74,21 @@ product brochure or a textbook introduction.
 See Rule 3 in SKILL.md. Technical vocabulary is for precision, not credibility.
 If a simpler word is equally accurate, use it.
 
+### 7. Visual content is required, not optional
+
+A wall of text is a build failure. Every module must include at least one of each:
+
+1. A Mermaid diagram (mechanism scaffold).
+2. A real image OR an embedded YouTube video.
+
+Real images come from Wikimedia Commons, NPS, archival public-domain sources, or images released under a CC license — embedded with the `figure` shortcode and a caption that names the author and license. Manufacturer educational pages (3Rivers, Bohning, Stickbow, etc.) are usually copyrighted; link out, do not redistribute.
+
+YouTube embeds (`youtube` shortcode) are the right choice for processes — anything where motion or sequence matters more than a still photo could capture. Knot tying, jig setup, dipping motion, drawing technique, soldering, knife-sharpening, plating: video, not prose.
+
+When free-use coverage is genuinely thin and a YouTube embed isn't right either, use the `visual-needed` shortcode — it renders a styled callout with one-click YouTube + Wikimedia search links so the reader can find their own video. **Do not leave bare HTML comments like `<!-- TODO: source image -->` in shipped modules.** They look fine in your editor and broken on the page.
+
+See `references/markdown-gotchas.md` for the three shortcodes (`figure`, `youtube`, `visual-needed`) and `agents/tmb-module-builder.md` for the mandatory sourcing process.
+
 ---
 
 ## Real-world anchoring
